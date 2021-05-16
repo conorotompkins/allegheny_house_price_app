@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 #mac file
 .DS_Store
+
+#big files
+big
