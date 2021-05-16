@@ -9,7 +9,7 @@ theme_set(theme_ipsum())
 
 #https://data.wprdc.org/dataset/parcel-centroids-in-allegheny-county-with-geographic-identifiers/resource/9cbe5c95-45f8-4094-bf7b-df5ed20ce7cf
 
-parcel_geo <-  vroom("data/big/centroiddec2019.csv") %>% 
+parcel_geo <-  vroom("data/raw/big/centroiddec2019.csv") %>% 
   clean_names() %>% 
   rename(longitude = intptlon10,
          latitude = intptlat10) %>% 
@@ -19,8 +19,8 @@ parcel_geo <-  vroom("data/big/centroiddec2019.csv") %>%
 glimpse(parcel_geo)
 
 parcel_geo %>% 
-  write_csv("data/clean_parcel_geo.csv")
+  write_csv("data/cleaned/big/clean_parcel_geo.csv")
 
-# parcel_geo %>% 
+# parcel_geo %>%
 #   ggplot(aes(longitude, latitude)) +
 #   geom_density_2d_filled()
