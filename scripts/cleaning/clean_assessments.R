@@ -40,7 +40,10 @@ names(assessments) <- names(assessments) %>%
                                "cdu" = "cdu_",
                                "basement" = "basement_",
                                "roof" = "roof_",
-                               "heatingcooling" = "heating_cooling_"))
+                               "heatingcooling" = "heating_cooling_",
+                               "fullbaths" = "full_baths",
+                               "halfbaths" = "half_baths",
+                               "bsmtgarage" = "basement_garage"))
 
 
 glimpse(assessments)
@@ -74,10 +77,10 @@ assessments_valid <- assessments %>%
 
 assessments_valid <- assessments_valid %>% 
   select(par_id, usedesc, school_desc, muni_desc, sale_desc, sale_price, sale_date,
-         year_blt, style_desc, bedrooms, fullbaths, halfbaths, finished_living_area,
+         year_blt, style_desc, bedrooms, full_baths, half_baths, finished_living_area,
          lot_area, grade_desc, condition_desc,
          extfinish_desc, roof_desc, basement_desc, cdu_desc, heating_cooling_desc,
-         fireplaces, bsmtgarage) %>% 
+         fireplaces, basement_garage) %>% 
   mutate(sale_date = mdy(sale_date),
          sale_year = year(sale_date),
          sale_month = month(sale_date, label = T),

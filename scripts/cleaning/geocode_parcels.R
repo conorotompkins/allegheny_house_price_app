@@ -150,4 +150,4 @@ updated_assessments %>%
   addPolygons(popup = ~geo_id)
 
 updated_assessments %>% 
-  write_csv("data/cleaned/big/clean_assessment_data_geo_id.csv")
+  write_csv("data/cleaned/big/clean_assessment_data_geocoded.csv")
