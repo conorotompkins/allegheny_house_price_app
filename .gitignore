@@ -43,3 +43,9 @@ vignettes/*.pdf
 
 #big files
 big
+
+#modelling objects
+data/modelling
+
+#saved images
+output/images
