@@ -6,9 +6,9 @@ library(hrbrthemes)
 
 theme_set(theme_ipsum())
 
-housing_sales <- read_csv("data/clean_housing_sales.csv")
+housing_sales <- read_csv("data/cleaned/big/clean_housing_sales.csv")
 
-bag_fit <- read_rds("data/bag_model_fit_v.03.rds")
+bag_fit <- read_rds("data/modelling/objects/bag_model_fit_v.03.rds")
 
 geo_id_rsq <- bag_fit %>%
   predict(housing_sales) %>%
@@ -34,11 +34,11 @@ bagged_rsq_chart <- geo_id_rsq %>%
        x = "R-squared")
 
 bagged_rsq_chart %>% 
-  ggsave(filename = "output/bagged_rsq_chart.png",
+  ggsave(filename = "output/images/bagged_rsq_chart.png",
          width = 8, height = 12)
 
 #bag model full results
 bag_fit %>% 
   predict(housing_sales) %>% 
   bind_cols(housing_sales) %>% 
-  write_csv("output/bag_full_model_results.csv")
+  write_csv("data/modelling/results/bag_full_model_results.csv")
