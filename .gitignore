@@ -49,3 +49,7 @@ data/modelling
 
 #saved images
 output/images
+
+#eda and modelling rmarkdown output HTML
+scripts/modelling/*.html
+scripts/eda/*.html
