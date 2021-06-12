@@ -45,6 +45,7 @@ vignettes/*.pdf
 big
 
 #modelling objects
+data/modelling/*.rds
 data/modelling/objects
 data/modelling/results
 
@@ -54,3 +55,9 @@ output/images
 #eda and modelling rmarkdown output HTML
 scripts/modelling/*.html
 scripts/eda/*.html
+
+#shiny app modelling objects and data files
+shiny_app/*.rds
+shiny_app/*.csv
+shiny_app/unified_geo_ids
+shiny_app/rsconnect
