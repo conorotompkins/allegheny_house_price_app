@@ -45,7 +45,8 @@ vignettes/*.pdf
 big
 
 #modelling objects
-data/modelling
+data/modelling/objects
+data/modelling/results
 
 #saved images
 output/images
