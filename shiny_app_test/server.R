@@ -158,9 +158,9 @@ server <- function(input, output, session) {
            x = "Actual Sale Price",
            y = "Sales of similar homes") +
       theme(#panel.background = element_rect(fill = "white"),
-            plot.subtitle = element_text(size = 22),
-            axis.title.x = element_text(size = 20, hjust = .5),
-            axis.title.y = element_text(size = 20))
+        plot.subtitle = element_text(size = 22),
+        axis.title.x = element_text(size = 20, hjust = .5),
+        axis.title.y = element_text(size = 20))
     
   })
   

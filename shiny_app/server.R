@@ -18,15 +18,7 @@ theme_set(theme_bw(base_size = 20))
 
 options(scipen = 999, digits = 2)
 
-model_fit <- read_rds("bag_model_fit_v.03.rds")
-
-style_desc_distinct <- read_csv("style_desc_distinct.csv")
-grade_desc_distinct <- read_csv("grade_desc_distinct.csv")
-condition_desc_distinct <- read_csv("condition_desc_distinct.csv")
-
-full_model_results <- vroom("trimmed_full_model_results.csv")
-
-geo_id_shapes <- st_read("unified_geo_ids/unified_geo_ids.shp")
+source("load_server_objects.R")
 
 server <- function(input, output, session) {
   
