@@ -44,10 +44,6 @@ assessments %>%
 file.copy(from = "data/modelling/objects/bag_model_fit_v.03.rds",
           to = "shiny_app/bag_model_fit_v.03.rds")
 
-#copy full model results from data/modelling/results to shiny_app/
-file.copy(from = "data/modelling/results/bag_full_model_results.csv",
-          to = "shiny_app/bag_full_model_results.csv")
-
 copy_unified_geos_shapefiles <- function(){
   
   dir_exists_check <- dir.exists("shiny_app/unified_geo_ids")
@@ -77,10 +73,6 @@ copy_unified_geos_shapefiles <- function(){
   list.files("shiny_app/unified_geo_ids")
   
 }
-
-file.copy(from = "data/modelling/objects/model_recipe_prepped.rds",
-          to = "shiny_app/model_recipe_prepped.rds")
-
 
 #trimmed model results
 vroom("data/modelling/results/bag_full_model_results.csv") %>% 
