@@ -1,20 +1,9 @@
 library(tidyverse)
-library(tigris)
-library(sf)
-library(concaveman)
 library(janitor)
+library(glue)
 
 assessments <- read_csv("data/cleaned/big/clean_assessment_data_geocoded.csv")
 parcel_geo <- read_csv("data/cleaned/big/clean_parcel_geo.csv")
-
-assessments %>% 
-  count(bedrooms)
-
-assessments %>% 
-  count(full_baths)
-
-assessments %>% 
-  count(half_baths)
 
 assessments %>% 
   count(geo_id, sort = T) %>% 
@@ -37,9 +26,6 @@ assessments %>%
   write_csv("shiny_app/grade_desc_distinct.csv")
 
 assessments %>% 
-  count(condition_desc)
-
-assessments %>% 
   distinct(condition_desc) %>% 
   drop_na(condition_desc) %>% 
   mutate(condition_desc = factor(condition_desc, levels = c(
@@ -54,25 +40,57 @@ assessments %>%
   arrange(condition_desc) %>% 
   write_csv("shiny_app/condition_desc_distinct.csv")
 
-
+#copy fit model from data/modelling/objects to shiny_app/
 file.copy(from = "data/modelling/objects/bag_model_fit_v.03.rds",
           to = "shiny_app/bag_model_fit_v.03.rds")
 
+#copy full model results from data/modelling/results to shiny_app/
 file.copy(from = "data/modelling/results/bag_full_model_results.csv",
           to = "shiny_app/bag_full_model_results.csv")
 
-dir.exists("shiny_app/unified_geo_ids")
-
-dir.create("shiny_app/unified_geo_ids", recursive = T)
-
-list.files("data/cleaned/big/unified_geo_ids", full.names = T)
-
-list.files("data/cleaned/big/unified_geo_ids", full.names = T) %>% 
-  map(file.copy, to = "shiny_app/unified_geo_ids")
+copy_unified_geos_shapefiles <- function(){
+  
+  dir_exists_check <- dir.exists("shiny_app/unified_geo_ids")
+  
+  glue('"shiny_app/unified_geo_ids" exists:', dir_exists_check, .sep = " ") %>% 
+    message()
+  
+  dir_populated <- list.files("shiny_app/unified_geo_ids") %>% 
+    length() == 4
+  
+  glue('"shiny_app/unified_geo_ids" has 4 files:', dir_populated, .sep = " ") %>% 
+    message()
+  
+  if(!dir_exists_check | !dir_populated){
+    
+    message("Creating directory and populating with shapefiles")
+    
+    dir.create("shiny_app/unified_geo_ids", recursive = T)
+    
+    list.files("data/cleaned/big/unified_geo_ids", full.names = T) %>% 
+      map(file.copy, to = "shiny_app/unified_geo_ids")
+  }
+  
+  else 
+    
+    message("Directory already exists with shapefiles")
+  list.files("shiny_app/unified_geo_ids")
+  
+}
 
 file.copy(from = "data/modelling/objects/model_recipe_prepped.rds",
           to = "shiny_app/model_recipe_prepped.rds")
 
+
+#trimmed model results
+vroom("data/modelling/results/bag_full_model_results.csv") %>% 
+  mutate(.pred_dollar = 10^.pred) %>% 
+  select(geo_id, style_desc, grade_desc, condition_desc,
+         bedrooms, full_baths, half_baths,
+         lot_area, finished_living_area, year_built,
+         heat_type, ac_flag, sale_month,
+         sale_price_adj, .pred_dollar) %>% 
+  write_csv("shiny_app/trimmed_full_model_results.csv")
 
 
 # 
