@@ -15,13 +15,8 @@ library(scales)
 library(leaflet)
 library(sf)
 
-
 #https://towardsdatascience.com/build-your-first-shiny-web-app-in-r-72f9538f9868
 #https://shiny.rstudio.com/tutorial/
-
-style_desc_distinct <- read_csv("shiny_app/style_desc_distinct.csv")
-grade_desc_distinct <- read_csv("shiny_app/grade_desc_distinct.csv")
-condition_desc_distinct <- read_csv("shiny_app/condition_desc_distinct.csv")
 
 ui <- fluidPage(theme = shinytheme("cerulean"),
                 title = "Allegheny County Home Sale Price Estimator",
