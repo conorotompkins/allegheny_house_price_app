@@ -143,7 +143,10 @@ unified_geo_ids <- school_districts %>%
   mutate(geo_id = str_squish(geo_id),
          ward_name = str_replace(ward_name, "PITTSBURGH", "Pittsburgh"),
          ward_name = str_remove(ward_name, "-"),
-         ward_name = str_squish(ward_name))
+         ward_name = str_squish(ward_name)) %>% 
+  mutate(center = st_centroid(geometry),
+         lng = map_dbl(center, 1),
+         lat = map_dbl(center, 2))
 
 unified_geo_ids %>% 
   st_drop_geometry() %>% 

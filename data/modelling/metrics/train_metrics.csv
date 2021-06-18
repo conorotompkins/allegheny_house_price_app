@@ -1,0 +1,91 @@
+model_name,dataset,id,.metric,.estimator,.estimate
+lm,train,Fold01,rmse,standard,103718.16819345679
+lm,train,Fold02,rmse,standard,244275.01238060524
+lm,train,Fold03,rmse,standard,85876.13120120038
+lm,train,Fold04,rmse,standard,82473.53075449719
+lm,train,Fold05,rmse,standard,84747.54978330212
+lm,train,Fold06,rmse,standard,79301.75828763012
+lm,train,Fold07,rmse,standard,78412.71381361985
+lm,train,Fold08,rmse,standard,95565.2660861011
+lm,train,Fold09,rmse,standard,76086.47512334712
+lm,train,Fold10,rmse,standard,79154.48327792279
+lm,train,Fold01,rsq,standard,0.6495363970180319
+lm,train,Fold02,rsq,standard,0.27108402518159136
+lm,train,Fold03,rsq,standard,0.7177799242319132
+lm,train,Fold04,rsq,standard,0.7306874016506044
+lm,train,Fold05,rsq,standard,0.7092022859010648
+lm,train,Fold06,rsq,standard,0.7300545387614302
+lm,train,Fold07,rsq,standard,0.7764521572160978
+lm,train,Fold08,rsq,standard,0.6527834222670595
+lm,train,Fold09,rsq,standard,0.736830599420796
+lm,train,Fold10,rsq,standard,0.7347103550630207
+lm,train,Fold01,mae,standard,41942.42941736848
+lm,train,Fold02,mae,standard,42345.38256486366
+lm,train,Fold03,mae,standard,40332.920917038056
+lm,train,Fold04,mae,standard,40405.144495229746
+lm,train,Fold05,mae,standard,40691.185254162716
+lm,train,Fold06,mae,standard,41163.27831124288
+lm,train,Fold07,mae,standard,41295.83592022797
+lm,train,Fold08,mae,standard,40466.41863659398
+lm,train,Fold09,mae,standard,40012.25347678023
+lm,train,Fold10,mae,standard,39928.78420750845
+random forest,train,Fold01,rmse,standard,60130.136677768016
+random forest,train,Fold02,rmse,standard,61850.69266703272
+random forest,train,Fold03,rmse,standard,62221.747124817375
+random forest,train,Fold04,rmse,standard,61227.64053948994
+random forest,train,Fold05,rmse,standard,59377.22566156318
+random forest,train,Fold06,rmse,standard,68304.80619137565
+random forest,train,Fold07,rmse,standard,66488.64493881568
+random forest,train,Fold08,rmse,standard,66771.32242134862
+random forest,train,Fold09,rmse,standard,57959.1356701396
+random forest,train,Fold10,rmse,standard,58652.558610397864
+random forest,train,Fold01,rsq,standard,0.8530564979402284
+random forest,train,Fold02,rsq,standard,0.8312925812860266
+random forest,train,Fold03,rsq,standard,0.8384843113680313
+random forest,train,Fold04,rsq,standard,0.8435130324172594
+random forest,train,Fold05,rsq,standard,0.8351663850247552
+random forest,train,Fold06,rsq,standard,0.8045649225828626
+random forest,train,Fold07,rsq,standard,0.8294879545216352
+random forest,train,Fold08,rsq,standard,0.825073265957226
+random forest,train,Fold09,rsq,standard,0.8364194271825641
+random forest,train,Fold10,rsq,standard,0.8450967547919586
+random forest,train,Fold01,mae,standard,34236.86932587895
+random forest,train,Fold02,mae,standard,33997.76780221427
+random forest,train,Fold03,mae,standard,33625.60071063424
+random forest,train,Fold04,mae,standard,34012.16231254405
+random forest,train,Fold05,mae,standard,33626.00968842623
+random forest,train,Fold06,mae,standard,34672.185988904654
+random forest,train,Fold07,mae,standard,34965.11569534185
+random forest,train,Fold08,mae,standard,33994.48630194816
+random forest,train,Fold09,mae,standard,33684.55615955071
+random forest,train,Fold10,mae,standard,33758.81826316183
+bagged tree,train,Fold01,rmse,standard,60621.87296751873
+bagged tree,train,Fold02,rmse,standard,63100.04662868067
+bagged tree,train,Fold03,rmse,standard,63662.08931358532
+bagged tree,train,Fold04,rmse,standard,62131.42506488915
+bagged tree,train,Fold05,rmse,standard,60846.381400871534
+bagged tree,train,Fold06,rmse,standard,70762.96184950114
+bagged tree,train,Fold07,rmse,standard,66304.75916352757
+bagged tree,train,Fold08,rmse,standard,68058.44552936949
+bagged tree,train,Fold09,rmse,standard,60167.981045352586
+bagged tree,train,Fold10,rmse,standard,60523.240207489616
+bagged tree,train,Fold01,rsq,standard,0.839437063203044
+bagged tree,train,Fold02,rsq,standard,0.8148722577287021
+bagged tree,train,Fold03,rsq,standard,0.820504453600073
+bagged tree,train,Fold04,rsq,standard,0.827524193050456
+bagged tree,train,Fold05,rsq,standard,0.8182612067031383
+bagged tree,train,Fold06,rsq,standard,0.7803382306259733
+bagged tree,train,Fold07,rsq,standard,0.8201747115536323
+bagged tree,train,Fold08,rsq,standard,0.8061807720675123
+bagged tree,train,Fold09,rsq,standard,0.8174150462656562
+bagged tree,train,Fold10,rsq,standard,0.8251693966908911
+bagged tree,train,Fold01,mae,standard,35780.49143749773
+bagged tree,train,Fold02,mae,standard,35554.37384517048
+bagged tree,train,Fold03,mae,standard,35233.48557416194
+bagged tree,train,Fold04,mae,standard,35321.66517801166
+bagged tree,train,Fold05,mae,standard,35208.87417804099
+bagged tree,train,Fold06,mae,standard,36368.03595894802
+bagged tree,train,Fold07,mae,standard,36351.3179395257
+bagged tree,train,Fold08,mae,standard,35411.10770165352
+bagged tree,train,Fold09,mae,standard,35371.65422430363
+bagged tree,train,Fold10,mae,standard,35333.014815393726
