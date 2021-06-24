@@ -33,8 +33,6 @@ housing_sales <- assessments_valid %>%
          longitude, latitude, year_built) %>% 
   mutate(sale_price_adj = log10(sale_price_adj))
 
-
-set.seed(1234)
 # Put 3/4 of the data into the training set 
 data_split <- initial_split(housing_sales, prop = 3/4, strata = sale_price_adj)
 
