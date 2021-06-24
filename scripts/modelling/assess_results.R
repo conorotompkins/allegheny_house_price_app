@@ -18,41 +18,19 @@ data_split <- initial_split(housing_sales, prop = 3/4)
 train_data <- training(data_split)
 test_data  <- testing(data_split)
 
-lm_fit <- read_rds("data/modelling/objects/lm_model_fit.rds")
-rf_fit <- read_rds("data/modelling/objects/rf_model_fit.rds")
 bag_fit <- read_rds("data/modelling/objects/bag_model_fit_v.03.rds")
 
-lm_fit %>% 
-  pull_workflow_fit() %>% 
-  tidy() %>% 
-  filter(term == "(Intercept)") %>% 
-  mutate(avg_price = 10^estimate) %>% 
-  pull(avg_price) %>% 
-  scales::dollar()
-
-lm_fit %>%
-  pull_workflow_fit() %>%
-  tidy() %>%
-  filter(term != "(Intercept)") %>%
-  mutate(term = fct_reorder(term, estimate)) %>%
-  ggplot(aes(estimate, term)) +
-  geom_point()
-
-rf_fit %>% 
-  pull_workflow_fit() %>% 
-  vip::vi() %>% 
-  mutate(Variable = fct_reorder(Variable, Importance)) %>% 
-  ggplot(aes(Importance, Variable)) +
-  geom_point()
 
 bag_fit
 
 #compare predictions against training data across models
-test_predictions_scatter_bagged <- bag_fit %>%
+test_predictions <- bag_fit %>%
   predict(test_data) %>%
   bind_cols(test_data) %>% 
-  mutate(model = "bagged tree") %>% 
-  ggplot(aes(log10(sale_price_adj), .pred)) +
+  mutate(model = "bagged tree")
+
+test_predictions_scatter_bagged <- test_predictions %>% 
+  ggplot(aes(sale_price_adj, .pred)) +
   geom_density_2d_filled() +
   geom_abline(color = "white", lty = 2) +
   coord_cartesian(xlim = c(4.5, 6), ylim = c(4.5, 6)) +
@@ -124,10 +102,12 @@ rf_vi_chart %>%
   ggsave(filename = "output/images/rf_vi_chart.png", height = 18, width = 12)
 
 #need to find var imp in bagged tree model
-bagged_tree_vi_chart <- bag_fit %>% 
+bagged_tree_vi <- bag_fit %>% 
   pull_workflow_fit() %>% 
-  butcher() %>% 
-  .$imp %>% 
+  .[['fit']] %>%
+  var_imp()
+
+bagged_tree_vi_chart <- bagged_tree_vi %>% 
   mutate(term_type = case_when(str_detect(term, "^geo_id") ~ "geo_id",
                                str_detect(term, "^grade_desc_") ~ "grade_desc",
                                str_detect(term, "^condition_desc_") ~ "condition_desc",
@@ -142,15 +122,14 @@ bagged_tree_vi_chart <- bag_fit %>%
   facet_wrap(~term_type, scales = "free", nrow = 3) +
   tidytext::scale_y_reordered()
 
+bagged_tree_vi_chart
+
 bagged_tree_vi_chart %>% 
-  ggsave(filename = "output/bagged_tree_vi_chart.png", 
+  ggsave(filename = "output/images/bagged_tree_vi_chart.png", 
          width = 12,
          height = 20)
 
-bag_fit %>% 
-  pull_workflow_fit() %>% 
-  butcher() %>% 
-  .$imp %>% 
+bagged_tree_vi %>% 
   write_csv("output/bagged_tree_variable_importance.csv")
 
 #predict bag against test data

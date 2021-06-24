@@ -10,10 +10,12 @@ housing_sales <- read_csv("data/cleaned/big/clean_housing_sales.csv")
 
 bag_fit <- read_rds("data/modelling/objects/bag_model_fit_v.03.rds")
 
-geo_id_rsq <- bag_fit %>%
+full_results <- bag_fit %>%
   predict(housing_sales) %>%
   bind_cols(housing_sales) %>% 
-  mutate(model = "bagged tree") %>% 
+  mutate(model = "bagged tree")
+
+geo_id_rsq <- full_results %>% 
   mutate(geo_id = fct_lump_min(geo_id, 500, other_level = "Other")) %>% 
   group_by(geo_id) %>% 
   rsq(truth = sale_price_adj, estimate = 10^.pred) %>% 

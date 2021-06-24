@@ -8,6 +8,7 @@ library(skimr)
 library(future)
 library(lobstr)
 library(butcher)
+library(tictoc)
 
 options(scipen = 999)
 theme_set(theme_ipsum())
@@ -29,15 +30,14 @@ housing_sales <- assessments_valid %>%
   select(par_id, sale_price_adj, house_age_at_sale, sale_year, sale_month, lot_area, 
          finished_living_area, bedrooms, full_baths, half_baths, geo_id, 
          style_desc, grade_desc, condition_desc, ac_flag, heat_type,
-         longitude, latitude, year_built)
+         longitude, latitude, year_built) %>% 
+  mutate(sale_price_adj = log10(sale_price_adj))
 
 housing_sales %>% 
   write_csv("data/cleaned/big/clean_housing_sales.csv")
 
 glimpse(housing_sales)
-# Fix the random numbers by setting the seed 
-# This enables the analysis to be reproducible when random numbers are used 
-set.seed(1234)
+
 # Put 3/4 of the data into the training set 
 data_split <- initial_split(housing_sales, prop = 3/4, strata = sale_price_adj)
 
@@ -45,16 +45,11 @@ data_split <- initial_split(housing_sales, prop = 3/4, strata = sale_price_adj)
 train_data <- training(data_split)
 test_data  <- testing(data_split)
 
-#create recipe
-model_recipe <- recipe(sale_price_adj ~ .,
-                       data = train_data %>%
-                         group_by(geo_id) %>% 
-                         slice_sample(n = 100) %>% 
-                         ungroup()
-) %>% 
+model_recipe_dummy <- recipe(sale_price_adj ~ .,
+                             data = train_data) %>% 
   update_role(par_id, new_role = "id") %>% 
   update_role(longitude, latitude, year_built, new_role = "metadata") %>% 
-  step_log(sale_price_adj, base = 10, skip = TRUE) %>% 
+  #step_log(sale_price_adj, base = 10, skip = TRUE) %>% 
   step_mutate(condition_desc = as.character(condition_desc),
               grade_desc = as.character(grade_desc),
               ac_flag = as.character(ac_flag),
@@ -63,8 +58,9 @@ model_recipe <- recipe(sale_price_adj ~ .,
                                     heat_type == "None" ~ heat_type,
                                     is.na(heat_type) ~ "Missing",
                                     TRUE ~ "Other")) %>% 
-  step_modeimpute(condition_desc, grade_desc, ac_flag) %>%
-  step_medianimpute(bedrooms, full_baths, half_baths) %>%
+  step_impute_mode(condition_desc, grade_desc, ac_flag) %>%
+  #add step_impute_mode for heat
+  step_impute_median(bedrooms, full_baths, half_baths) %>%
   step_mutate(condition_desc = case_when(condition_desc %in% c("Poor", "Very Poor", "Unsound") ~ "Poor or worse",
                                          condition_desc %in% c("Very Good", "Excellent") ~ "Very Good or better",
                                          TRUE ~ condition_desc)) %>%
@@ -81,14 +77,7 @@ model_recipe <- recipe(sale_price_adj ~ .,
   step_relevel(heat_type, ref_level = "Central Heat") %>% 
   step_dummy(all_nominal(), -has_role(c("id", "metadata")))
 
-model_recipe %>% 
+model_recipe_dummy %>% 
   prep() %>% 
-  juice() %>% 
+  bake(new_data = NULL) %>% 
   glimpse()
-
-model_recipe %>% 
-  write_rds("data/modelling/objects/model_recipe.rds")
-
-model_recipe %>% 
-  prep() %>% 
-  write_rds("data/modelling/objects/model_recipe_prepped.rds")
