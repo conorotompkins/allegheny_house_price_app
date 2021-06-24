@@ -164,6 +164,7 @@ grid_ctrl <-
     save_workflow = FALSE
   )
 
+tic()
 grid_results <-
   wflow_sets %>%
   workflow_map(
@@ -171,8 +172,11 @@ grid_results <-
     resamples = folds_train,
     fn = "fit_resamples",
     #grid = 5,
-    control = grid_ctrl
+    control = grid_ctrl,
+    verbose = T
   )
+toc()
+#2824.896 sec elapsed
 
 grid_results %>% 
   distinct(wflow_id)
