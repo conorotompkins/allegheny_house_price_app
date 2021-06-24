@@ -8,13 +8,18 @@ library(sf)
 library(leaflet)
 library(skimr)
 
+#new data source
+#with centroid lat lon
+#https://data.wprdc.org/dataset/property-data-with-geographic-identifiers/resource/2072321e-aa7c-486d-8b14-8ae79363cb68
+
+#old data source
 #https://data.wprdc.org/dataset/property-assessments/resource/f2b8d575-e256-4718-94ad-1e12239ddb92
 
 theme_set(theme_ipsum())
 
 #options(scipen = 999, digits = 4)
 
-assessments <- vroom("data/raw/big/assessments.csv",
+assessments <- vroom("https://tools.wprdc.org/downstream/2072321e-aa7c-486d-8b14-8ae79363cb68",
                      col_types = cols(.default = "c")) %>% 
   clean_names() %>% 
   rename(par_id = parid)
@@ -80,7 +85,8 @@ assessments_valid <- assessments_valid %>%
          year_blt, style_desc, bedrooms, full_baths, half_baths, finished_living_area,
          lot_area, grade_desc, condition_desc,
          extfinish_desc, roof_desc, basement_desc, cdu_desc, heating_cooling_desc,
-         fireplaces, basement_garage) %>% 
+         fireplaces, basement_garage,
+         latitude, longitude) %>% 
   mutate(sale_date = mdy(sale_date),
          sale_year = year(sale_date),
          sale_month = month(sale_date, label = T),
@@ -139,14 +145,13 @@ assessments_valid <- assessments_valid %>%
                                TRUE ~ heat_type))
 
 assessments_valid %>% 
-  count(ac_flag, heat_type, heating_cooling_desc, sort = T) #%>% 
-#View()
+  count(ac_flag, heat_type, heating_cooling_desc, sort = T)
 
 assessments_valid$sale_price_adj <- adjust_for_inflation(assessments_valid$sale_price, 
                                                          from_date = assessments_valid$sale_year, 
                                                          country = "US", 
-                                                         #set everything to 2019 dollars
-                                                         to_date = 2019)
+                                                         #set everything to 2020 dollars
+                                                         to_date = 2020)
 
 glimpse(assessments_valid)
 

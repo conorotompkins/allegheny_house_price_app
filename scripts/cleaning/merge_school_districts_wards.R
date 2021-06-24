@@ -37,10 +37,11 @@ council_districts <- st_read("data/raw/big/City_Council_Districts_2012-shp/Counc
 municipalities <- st_read("data/raw/big/Allegheny_County_Municipal_Boundaries-shp/LandRecords_LANDRECORDS_OWNER_Municipalities.shp") %>% 
   st_transform(4326) %>% 
   clean_names() %>% 
-  select(label, geometry)
+  rename(municipality_name = label) %>% 
+  select(municipality_name, geometry)
 
 mt_oliver <- municipalities %>% 
-  filter(label == "Mount Oliver Borough")
+  filter(municipality_name == "Mount Oliver Borough")
 
 #wards
 
@@ -51,6 +52,7 @@ wards <- st_read("data/raw/big/Wards-shp/Wards.shp") %>%
   rename(ward_name = ward_count) %>% 
   mutate(ward_centroid = st_point_on_surface(geometry))
 
+#confirm centroids exist in correct wards
 wards %>% 
   ggplot() +
   geom_sf() +
@@ -64,6 +66,7 @@ wards %>%
   geom_sf(data = council_districts) +
   geom_sf(aes(color = council_district))
 
+#join wards to council districts
 wards <- 
   wards %>% 
   st_drop_geometry() %>% 
@@ -130,16 +133,16 @@ unified_geo_ids <- school_districts %>%
   mutate(geo_id = case_when(
     
     #when council_district AND label are missing, use school_district
-    is.na(council_district) & is.na(label) ~ school_district,
+    is.na(council_district) & is.na(municipality_name) ~ school_district,
     
     #when school_district AND label are missing, use council_district
-    is.na(school_district) & is.na(label) ~ council_district,
+    is.na(school_district) & is.na(municipality_name) ~ council_district,
     
     #when school_district and council_district are missing, use label
-    is.na(school_district) & is.na(council_district) ~ label)
+    is.na(school_district) & is.na(council_district) ~ municipality_name)
     
   ) %>% 
-  select(geo_id, school_district, council_district, ward_name, label, geometry) %>% 
+  select(geo_id, school_district, council_district, ward_name, municipality_name, geometry) %>% 
   mutate(geo_id = str_squish(geo_id),
          ward_name = str_replace(ward_name, "PITTSBURGH", "Pittsburgh"),
          ward_name = str_remove(ward_name, "-"),
