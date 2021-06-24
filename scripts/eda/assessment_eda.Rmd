@@ -66,7 +66,7 @@ assessments_valid %>%
   scale_x_log10(labels = dollar)
 ```
 
-Adjusting for inflation (`sale_price_adj` is 2019 dollars) removes a lot of the drift over time.
+Adjusting for inflation (`sale_price_adj` is 2020 dollars) removes a lot of the drift over time.
 ```{r}
 assessments_valid %>%
   select(sale_year, sale_price, sale_price_adj) %>% 
@@ -74,6 +74,23 @@ assessments_valid %>%
   ggplot(aes(sale_year, value, color = name)) +
   geom_smooth() +
   scale_y_continuous(labels = dollar)
+```
+House sales have plateaued since the 2008 mortgage crisis.
+```{r}
+sale_year_count <- assessments_valid %>% 
+  count(sale_year)
+
+sale_year_count %>% 
+  mutate(year_flag = case_when(sale_year == 2021 ~ "2021",
+                          sale_year < 2021 ~ "Before 2021")) %>% 
+  ggplot(aes(sale_year, n)) +
+  geom_smooth(data = sale_year_count %>% 
+                filter(sale_year != 2021),
+              se = F) +
+  geom_point(aes(color = year_flag)) +
+  labs(x = "Sale Year",
+       y = "Sales",
+       color = NULL)
 ```
 
 ```{r}
