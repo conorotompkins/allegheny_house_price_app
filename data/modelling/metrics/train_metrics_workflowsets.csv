@@ -1,9 +1,9 @@
 wflow_id,.config,preproc,model,.metric,.estimator,mean,n,std_err
-standard_random_forest,Preprocessor1_Model1,recipe,rand_forest,rmse,standard,0.15976734958119443,10,0.001025177593133718
-standard_random_forest,Preprocessor1_Model1,recipe,rand_forest,rsq,standard,0.7595311678968248,10,0.0022357738222491133
-dummy_random_forest,Preprocessor1_Model1,recipe,rand_forest,rmse,standard,0.15063792140171467,10,9.947546450270205e-4
-dummy_random_forest,Preprocessor1_Model1,recipe,rand_forest,rsq,standard,0.7872784991760868,10,0.0021756856010702015
-dummy_linear_model,Preprocessor1_Model1,recipe,linear_reg,rmse,standard,0.1710360245308708,10,9.292012002394916e-4
-dummy_linear_model,Preprocessor1_Model1,recipe,linear_reg,rsq,standard,0.7226993660247923,10,0.0021304908927046633
-dummy_bagged_tree,Preprocessor1_Model1,recipe,bag_tree,rmse,standard,0.15778296775214354,10,9.85372385220004e-4
-dummy_bagged_tree,Preprocessor1_Model1,recipe,bag_tree,rsq,standard,0.7640249551524255,10,0.0023612822028120043
+standard_random_forest,Preprocessor1_Model1,recipe,rand_forest,rmse,standard,0.15882270561521028,10,7.952074340489236e-4
+standard_random_forest,Preprocessor1_Model1,recipe,rand_forest,rsq,standard,0.7602990393929355,10,0.0015820678503596726
+dummy_random_forest,Preprocessor1_Model1,recipe,rand_forest,rmse,standard,0.14971294611694755,10,7.66172617179958e-4
+dummy_random_forest,Preprocessor1_Model1,recipe,rand_forest,rsq,standard,0.7880445686956897,10,0.0014439642777818121
+dummy_linear_model,Preprocessor1_Model1,recipe,linear_reg,rmse,standard,0.1695808123765335,10,7.779486024704377e-4
+dummy_linear_model,Preprocessor1_Model1,recipe,linear_reg,rsq,standard,0.724989732774569,10,0.0015013503893255475
+dummy_bagged_tree,Preprocessor1_Model1,recipe,bag_tree,rmse,standard,0.1565781471070922,10,8.071299213136231e-4
+dummy_bagged_tree,Preprocessor1_Model1,recipe,bag_tree,rsq,standard,0.7655666766944672,10,0.0018498125653709568
