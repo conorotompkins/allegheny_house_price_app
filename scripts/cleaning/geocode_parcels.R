@@ -10,8 +10,7 @@ theme_set(theme_bw())
 assessments_valid <- vroom("data/cleaned/big/clean_assessment_data.csv")
 
 assessments_valid %>% 
-  count(school_desc, sort = T) %>% 
-  View()
+  count(school_desc, sort = T)
 
 assessments_valid %>% 
   filter(is.na(school_desc)) %>% 
@@ -28,18 +27,15 @@ unified_geo_id_crosswalk <- st_read("data/cleaned/big/unified_geo_ids/unified_ge
   rename(school_district = schl_ds,
          council_district = cncl_ds,
          ward_name = ward_nm,
-         municipality_enclave = label)
+         municipality = mncplt_)
 
 glimpse(unified_geo_id_crosswalk)
 
-unified_geo_id_crosswalk %>% 
-  count(ward_name)
-
 unified_geo_id_crosswalk %>%
   st_drop_geometry() %>% 
-  count(geo_id, sort = T) %>% 
-  View()
+  count(geo_id, sort = T)
 
+#create sf of geo_id boundaries
 unified_geo_ids <- unified_geo_id_crosswalk %>% 
   group_by(geo_id) %>% 
   summarize()
@@ -52,89 +48,60 @@ unified_geo_ids %>%
   leaflet() %>%
   addPolygons(popup = ~geo_id)
 
-#sales of houses that aren't in the parcel geometry file
-missing_geo_1 <- assessments_valid %>% 
-  anti_join(parcel_geo, by = c("par_id" = "pin"))
 
-missing_geo_1 %>% 
-  count(school_desc, sort = T)
-
-#sales of houses that are in the parcel geometry file
 joined_geo <- assessments_valid %>% 
-  left_join(parcel_geo, by = c("par_id" = "pin")) %>% 
-  drop_na(longitude, latitude) %>% 
+  #create coordinates from longitude and latitude
   st_as_sf(coords = c("longitude", "latitude"), crs = "NAD83") %>% 
-  st_join(unified_geo_ids) %>% 
-  st_drop_geometry()
+  #join against unified geo id crosswalk based on intersection
+  st_join(unified_geo_ids, join = st_intersects)
 
-#sales of houses with missing geo_ids
-missing_geo_2 <- joined_geo %>% 
-  filter(is.na(geo_id)) %>% 
-  select(-geo_id)
+#find cases where st_join failed
+missing_geo <- joined_geo %>% 
+  filter(is.na(geo_id))
 
-#remove sales of houses with missing geo_ids from joined_geo
-joined_geo %>% 
-  semi_join(missing_geo_1, by = "par_id") %>% 
-  nrow() #should be 0
+#map failures
+missing_geo %>% 
+  ggplot() +
+  geom_sf(data = unified_geo_ids) +
+  geom_sf()
 
-joined_geo %>% 
-  semi_join(missing_geo_2, by = "par_id") %>% 
-  nrow() #should be whatever had missing geo_id in  joined_geo
+#st_join based on nearest sf feature
+missing_geo <- missing_geo %>% 
+  select(-geo_id) %>% 
+  st_join(unified_geo_ids, join = st_nearest_feature)
 
-joined_geo <- joined_geo %>% 
-  anti_join(missing_geo_1, by = "par_id") %>% 
-  anti_join(missing_geo_2, by = "par_id")
-
-unified_geo_id_crosswalk %>% 
+missing_geo %>% 
   st_drop_geometry() %>% 
-  distinct(ward_name)
+  count(geo_id, sort = T)
 
-missing_geo_combined <- bind_rows(missing_geo_1, missing_geo_2)
-
-missing_geo_combined <- missing_geo_combined %>% 
-  left_join(unified_geo_id_crosswalk %>% 
-              st_drop_geometry() %>% 
-              select(geo_id, ward_name), 
-            by = c("school_desc" = "ward_name")) %>% 
-  mutate(geo_id = coalesce(geo_id, school_desc)) %>% 
-  mutate(geo_id = case_when(#school_desc == "19th Ward Pittsburgh" ~ "City Council District 4",
-    #school_desc == "Woodland Hills" ~ "Woodland Hills",
-    #school_desc == "Chartiers Valley" ~ "Chartiers Valley",
-    #school_desc == "Bethel Park" ~ "Bethel Park",
-    #school_desc == "Moon Area" ~ "Moon Area",
-    #school_desc == "West Jefferson Hills" ~ "West Jefferson Hills",
-    school_desc == "Plum Boro" ~ "Plum Borough",
-    #school_desc == "South Park" ~ "South Park",
-    school_desc == "Upper St Clair" ~ "Upper St. Clair Area",
-    TRUE ~ geo_id))
-
-missing_geo_combined %>% 
-  filter(is.na(geo_id)) %>% 
-  distinct(school_desc, geo_id)
-
-missing_geo_combined %>% 
-  distinct(geo_id, school_desc, muni_desc) %>% 
+#drop rows with missing geo_id from joined_geo
+joined_geo <- joined_geo %>% 
+  anti_join(st_drop_geometry(missing_geo), by = "par_id")
+  
+#add the rows back, left_join to get geo_id
+joined_geo <- joined_geo %>% 
+  bind_rows(missing_geo)
+  
+joined_geo %>% 
+  st_drop_geometry() %>% 
+  count(geo_id, sort = T) %>% 
   View()
 
 joined_geo %>% 
-  semi_join(missing_geo_combined, by = "par_id") %>% 
-  nrow() #should be 0
-
-updated_assessments <- bind_rows(joined_geo, missing_geo_combined)
-
-missing_geo_combined %>% 
-  anti_join(updated_assessments, by = "par_id") %>% 
-  nrow() #should be 0
-
-# updated_assessments %>% 
-#   count(geo_id, sort = T) %>% 
-#   View()
-
-updated_assessments %>% 
+  st_drop_geometry() %>% 
   filter(is.na(geo_id)) %>% 
-  distinct(school_desc)
+  nrow()
 
-updated_assessments %>% 
+joined_geo <- joined_geo %>% 
+  mutate(center = st_centroid(geometry),
+         lng = map_dbl(center, 1),
+         lat = map_dbl(center, 2)) %>% 
+  select(-center) %>% 
+  st_drop_geometry()
+
+glimpse(joined_geo)
+
+joined_geo %>% 
   count(geo_id, sort = T) %>% 
   left_join(unified_geo_ids) %>%
   st_sf() %>% 
@@ -142,12 +109,12 @@ updated_assessments %>%
   geom_sf(aes(fill = n)) +
   scale_fill_viridis_c()
 
-updated_assessments %>% 
+joined_geo %>% 
   count(geo_id, sort = T) %>% 
   left_join(unified_geo_ids) %>%
   st_sf() %>% 
   leaflet() %>% 
   addPolygons(popup = ~geo_id)
 
-updated_assessments %>% 
+joined_geo %>% 
   write_csv("data/cleaned/big/clean_assessment_data_geocoded.csv")
