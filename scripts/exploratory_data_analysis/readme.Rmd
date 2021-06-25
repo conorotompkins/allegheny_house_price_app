@@ -109,7 +109,7 @@ assessments_valid %>%
 ### Location
 
 The location of the house (`geo_id`) has a big impact on `sale_price_adj`.
-```{r}
+```{r, include = F, eval = F}
 geo_id_median_price <- assessments_valid %>% 
   group_by(geo_id) %>% 
   summarize(median_price = median(sale_price_adj))
