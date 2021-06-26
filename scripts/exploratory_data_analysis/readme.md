@@ -41,18 +41,7 @@ unified_geo_ids_path <- here("data/cleaned/big/unified_geo_ids/unified_geo_ids.s
 assessments_valid <- read_csv(assessment_data_path) %>% 
   mutate(sale_month = factor(sale_month, levels = month.abb))
 
-geo_ids <- st_read(unified_geo_ids_path)
-```
-
-```
-## Reading layer `unified_geo_ids' from data source 
-##   `/Users/conortompkins/github_repos/allegheny_house_price_app/data/cleaned/big/unified_geo_ids/unified_geo_ids.shp' 
-##   using driver `ESRI Shapefile'
-## Simple feature collection with 80 features and 7 fields
-## Geometry type: MULTIPOLYGON
-## Dimension:     XY
-## Bounding box:  xmin: -80.36 ymin: 40.19 xmax: -79.69 ymax: 40.67
-## Geodetic CRS:  WGS 84
+geo_ids <- st_read(unified_geo_ids_path, quiet = T)
 ```
 
 ### Get an idea of the data
@@ -188,19 +177,25 @@ assessments_valid %>%
 
 ![](readme_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
-Adjusting for inflation (`sale_price_adj` is 2020 dollars) removes a lot of the drift over time.
+Adjusting for inflation (`sale_price_adj` is in 2020 dollars) removes a lot of the drift over time.
 
 ```r
 assessments_valid %>%
   select(sale_year, sale_price, sale_price_adj) %>% 
   pivot_longer(cols = contains("sale_price")) %>% 
+  mutate(name = case_when(name == "sale_price" ~ "Nominal dollars",
+                          name == "sale_price_adj" ~ "Inflation-adjusted 2020 dollars")) %>% 
   ggplot(aes(sale_year, value, color = name)) +
   geom_smooth() +
+  labs(x = "Sale Year",
+       y = "Price",
+       color = NULL) +
   scale_y_continuous(labels = dollar)
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
-House sales have plateaued since the 2008 mortgage crisis.
+
+House sales have plateaued since the 2008 mortgage crisis, with more year-to-year variation.
 
 ```r
 sale_year_count <- assessments_valid %>% 
@@ -208,7 +203,7 @@ sale_year_count <- assessments_valid %>%
 
 sale_year_count %>% 
   mutate(year_flag = case_when(sale_year == 2021 ~ "2021",
-                          sale_year < 2021 ~ "Before 2021")) %>% 
+                               sale_year < 2021 ~ "Before 2021")) %>% 
   ggplot(aes(sale_year, n)) +
   geom_smooth(data = sale_year_count %>% 
                 filter(sale_year != 2021),
@@ -221,6 +216,7 @@ sale_year_count %>%
 
 ![](readme_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
+Median sale price and the number of sales both peak over the summer months.
 
 ```r
 assessments_valid %>% 
@@ -229,6 +225,7 @@ assessments_valid %>%
   ggplot(aes(sale_month, sale_price_adj, group = sale_month, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
+  labs(fill = "Sales") +
   scale_y_log10() +
   coord_cartesian(ylim = c(10^4, 10^6)) +
   scale_fill_viridis_c()
@@ -250,46 +247,59 @@ assessments_valid %>%
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 ### House Characteristics
 
-The age of the house at time of sale has a negative relationship with sale price, but is heteroskedastic. This indicates that some houses retain their value better over time (and/or that houses that don't retain value aren't bought and sold).
+The age of the house at time of sale has a negative relationship with sale price, but is heteroskedastic. This indicates that some houses retain their value better over time (and/or houses that don't retain value aren't bought and sold).
 
 ```r
 assessments_valid %>% 
   ggplot(aes(house_age_at_sale, sale_price_adj)) +
-  geom_density_2d_filled() +
-  scale_y_log10(labels = dollar)
+  geom_density_2d_filled(contour_var = "count") +
+  scale_y_log10(labels = dollar) +
+  guides(fill = guide_colorsteps()) +
+  labs(y = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 #### Lot Area
 
-There is not an obvious relationship between `lot_area` and `sale_price_adj`.
+There is a positive relationship between `lot_area` and `sale_price_adj`.
 
 ```r
 assessments_valid %>% 
   ggplot(aes(lot_area, sale_price_adj)) +
-  geom_density_2d_filled() +
+  geom_density_2d_filled(contour_var = "count") +
   scale_y_log10(labels = dollar) +
-  coord_cartesian(xlim = c(0, 50000))
+  scale_x_log10() +
+  guides(fill = guide_colorsteps()) +
+  labs(x = "Lot area sq. ft. log10 scale",
+       y = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
-But, `lot_area` varies drastically across `geo_id`, so there might still be a useful feature to be engineered.
+`lot_area` varies drastically across `geo_id`, so there is probably a useful feature to be engineered.
 
 ```r
 assessments_valid %>% 
+  add_count(geo_id) %>% 
   mutate(geo_id = fct_reorder(geo_id, lot_area, .fun = median)) %>% 
-  ggplot(aes(lot_area, geo_id)) +
-  geom_boxplot(outlier.alpha = 0) +
-  coord_cartesian(xlim = c(0, 40000))
+  ggplot(aes(lot_area, geo_id, fill = n)) +
+geom_boxplot(outlier.alpha = 0,
+               color = "grey") +
+  scale_x_log10() +
+  scale_fill_viridis_c() +
+  labs(x = "Lot area sq. ft. log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
@@ -298,10 +308,15 @@ assessments_valid %>%
 
 ```r
 assessments_valid %>% 
+  add_count(style_desc) %>% 
   mutate(style_desc = fct_reorder(style_desc, lot_area, .fun = median)) %>% 
-  ggplot(aes(lot_area, style_desc)) +
-  geom_boxplot(outlier.alpha = 0) +
-  coord_cartesian(xlim = c(0, 10^5))
+  ggplot(aes(lot_area, style_desc, fill = n)) +
+geom_boxplot(outlier.alpha = 0,
+               color = "grey") +
+  scale_x_log10() +
+  scale_fill_viridis_c() +
+  labs(x = "Lot area sq. ft. log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
@@ -313,9 +328,13 @@ assessments_valid %>%
 ```r
 assessments_valid %>% 
   ggplot(aes(finished_living_area, sale_price_adj)) +
-  geom_density_2d_filled() +
+  geom_density_2d_filled(contour_var = "count") +
+  scale_x_log10() +
   scale_y_log10(labels = dollar) +
-  coord_cartesian(xlim = c(0, 5000))
+  guides(fill = guide_colorsteps()) +
+  labs(x = "Finished Living Area sq. ft. log10 scale",
+       y = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
@@ -324,10 +343,16 @@ assessments_valid %>%
 
 ```r
 assessments_valid %>% 
+  add_count(style_desc) %>% 
   mutate(style_desc = fct_reorder(style_desc, finished_living_area, .fun = median)) %>% 
-  ggplot(aes(finished_living_area, style_desc)) +
-  geom_boxplot(outlier.alpha = 0) +
-  coord_cartesian(xlim = c(0, 10^4))
+  ggplot(aes(finished_living_area, style_desc, fill = n)) +
+geom_boxplot(outlier.alpha = 0,
+               color = "grey") +
+  scale_x_log10() +
+  #coord_cartesian(xlim = c(0, 10^4)) +
+  scale_fill_viridis_c() +
+  labs(x = "Finished Living Area sq. ft. log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
@@ -336,10 +361,16 @@ assessments_valid %>%
 
 ```r
 assessments_valid %>% 
+  add_count(geo_id) %>% 
   mutate(geo_id = fct_reorder(geo_id, finished_living_area, .fun = median)) %>% 
-  ggplot(aes(finished_living_area, geo_id)) +
-  geom_boxplot(outlier.alpha = 0) +
-  coord_cartesian(xlim = c(0, 10000))
+  ggplot(aes(finished_living_area, geo_id, fill = n)) +
+geom_boxplot(outlier.alpha = 0,
+               color = "grey") +
+  scale_x_log10() +
+  #coord_cartesian(xlim = c(0, 10000)) +
+  scale_fill_viridis_c() +
+  labs(x = "Finished Living Area sq. ft. log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
@@ -356,26 +387,12 @@ assessments_valid %>%
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(labels = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
-
-#### CDU
-
-
-```r
-assessments_valid %>% 
-  mutate(cdu_desc = fct_reorder(cdu_desc, sale_price_adj, .fun = median)) %>% 
-  add_count(cdu_desc) %>% 
-  ggplot(aes(sale_price_adj, cdu_desc,  fill = n)) +
-  geom_boxplot(outlier.alpha = 0,
-               color = "grey") +
-  scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
-```
-
-![](readme_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 #### Condition
 
@@ -389,10 +406,12 @@ assessments_valid %>%
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(labels = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 There are 4 main types of houses, with a lot of low-n types that can be collapsed.
 
@@ -404,7 +423,7 @@ assessments_valid %>%
   geom_col()
 ```
 
-![](readme_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
 There is some time-series pattern in when different types of houses were created.
 
@@ -415,11 +434,11 @@ assessments_valid %>%
   mutate(style_desc = fct_reorder(style_desc, n, .fun = "max", .desc = T)) %>% 
   ggplot(aes(year_built, fill = style_desc)) +
   geom_histogram(binwdidth = 30) +
-  guides(fill = FALSE) +
-  facet_wrap(~style_desc, scales = "free_y")
+  guides(fill = "none") +
+  facet_wrap(~style_desc, scales = "free_y", ncol = 2)
 ```
 
-![](readme_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
 
 #### Bathrooms
 
@@ -437,11 +456,12 @@ assessments_valid %>%
   scale_y_continuous(breaks = c(0:12),
                      expand = c(0,0)) +
   coord_equal() +
+  labs(fill = "Sales") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 ```
 
-![](readme_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 `fullbaths` and `sale_price_adj` are positively related.
 
@@ -453,10 +473,12 @@ assessments_valid %>%
                color = "grey") +
   scale_x_log10(label = dollar) +
   scale_y_continuous(breaks = c(0:12)) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 There appear to be diminishing returns on the number of half bathrooms.
 
@@ -468,10 +490,12 @@ assessments_valid %>%
                color = "grey") +
   scale_x_log10(label = dollar) +
   scale_y_continuous(breaks = c(0:9)) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 #### Heating and cooling
 
@@ -485,41 +509,48 @@ assessments_valid %>%
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
 
-Impute missing based on mode for `geo_id` and `style_desc`.
+The type of heating is positively related to sale price.
 
 ```r
 assessments_valid %>% 
-  mutate(heat_type = fct_reorder(heat_type, sale_price_adj, .fun = median)) %>% 
+  mutate(heat_type = fct_explicit_na(heat_type),
+         heat_type = fct_reorder(heat_type, sale_price_adj, .fun = median)) %>% 
   add_count(heat_type) %>% 
   ggplot(aes(sale_price_adj, heat_type, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-26-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
 
-Impute missing based on mode for `geo_id` and `style_desc.`
+Whether the house has AC is also positively related to sale price.
 
 ```r
 assessments_valid %>% 
-  mutate(ac_flag = as.character(ac_flag)) %>% 
+  mutate(ac_flag = as.character(ac_flag),
+         ac_flag = fct_explicit_na(ac_flag)) %>% 
   mutate(ac_flag = fct_reorder(ac_flag, sale_price_adj, .fun = median)) %>% 
   add_count(ac_flag) %>% 
   ggplot(aes(sale_price_adj, ac_flag, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-26-1.png)<!-- -->
 
 #### Exterior
 
@@ -527,16 +558,19 @@ Impute missing based on mode for `geo_id` and `style_desc.`
 
 ```r
 assessments_valid %>% 
-  mutate(extfinish_desc = fct_reorder(extfinish_desc, sale_price_adj, .fun = median)) %>% 
+  mutate(extfinish_desc = fct_explicit_na(extfinish_desc),
+         extfinish_desc = fct_reorder(extfinish_desc, sale_price_adj, .fun = median)) %>% 
   add_count(extfinish_desc) %>% 
   ggplot(aes(sale_price_adj, extfinish_desc, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
 
 #### Roof
 
@@ -544,16 +578,19 @@ Impute missing based on mode for `geo_id` and `style_desc.`
 
 ```r
 assessments_valid %>% 
-  mutate(roof_desc = fct_reorder(roof_desc, sale_price_adj, .fun = median)) %>% 
+  mutate(roof_desc = fct_explicit_na(roof_desc),
+         roof_desc = fct_reorder(roof_desc, sale_price_adj, .fun = median)) %>% 
   add_count(roof_desc) %>% 
   ggplot(aes(sale_price_adj, roof_desc, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
 
 #### Basement
 
@@ -561,16 +598,18 @@ Impute missing based on mode for `geo_id` and `style_desc.`
 
 ```r
 assessments_valid %>% 
-  mutate(basement_desc = fct_reorder(basement_desc, sale_price_adj, .fun = median)) %>% 
+  mutate(basement_desc = fct_explicit_na(basement_desc),
+         basement_desc = fct_reorder(basement_desc, sale_price_adj, .fun = median)) %>% 
   add_count(basement_desc) %>% 
   ggplot(aes(sale_price_adj, basement_desc, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
 
 #### Basement garage
 
@@ -578,36 +617,53 @@ Impute missing based on mode for `geo_id` and `style_desc.`
 Need to look up what this column is. Number of cars that can fit in the basement garage?
 
 ```r
+max_basement_garage <- assessments_valid %>% 
+  summarize(max(basement_garage, na.rm = T)) %>% 
+  pull()
+
 assessments_valid %>% 
   select(sale_price_adj, basement_garage) %>% 
   mutate(basement_garage = as.character(basement_garage),
          basement_garage = fct_explicit_na(basement_garage),
-         basement_garage = fct_reorder(basement_garage, sale_price_adj, .fun = median)) %>% 
+         basement_garage = fct_relevel(basement_garage, c(as.character(0:max_basement_garage), "(Missing)"))) %>% 
   add_count(basement_garage) %>% 
   ggplot(aes(sale_price_adj, basement_garage, group = basement_garage, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
 
 #### Fireplaces
 
 Positive relationship between number of fireplaces and sale price, but most houses have 1 or 2. Consider changing to lgl `fireplace_flag` column where it checks `fireplaces` >= 1.
 
 ```r
+#need to deal with missing fireplace rows
+max_fireplaces <- assessments_valid %>% 
+  summarize(max(fireplaces, na.rm = T)) %>% 
+  pull()
+
+
 assessments_valid %>% 
+  select(sale_price_adj, fireplaces) %>% 
+  mutate(fireplaces = as.character(fireplaces),
+         fireplaces = fct_explicit_na(fireplaces),
+         fireplaces = fct_relevel(fireplaces, c(as.character(0:max_fireplaces), "(Missing)"))) %>% 
   add_count(fireplaces) %>% 
   ggplot(aes(sale_price_adj, fireplaces, group = fireplaces, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10(label = dollar) +
-  scale_fill_viridis_c()
+  scale_fill_viridis_c() +
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
-![](readme_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
 
 ### Identify UI cutoffs
 
@@ -620,7 +676,7 @@ assessments_valid %>%
   scale_x_log10()
 ```
 
-![](readme_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
 
 
 ```r
@@ -631,4 +687,4 @@ assessments_valid %>%
   geom_vline(xintercept = 10000)
 ```
 
-![](readme_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
+![](readme_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
