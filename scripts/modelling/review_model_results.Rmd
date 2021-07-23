@@ -1,7 +1,7 @@
 ---
 title: "Review Model Results"
 author: "Conor Tompkins"
-date: "1/26/2021"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
@@ -67,21 +67,29 @@ metrics_test
 model_results %>% 
   ggplot(aes(.resid)) +
   geom_density() +
-  geom_vline(xintercept = 0, lty = 2)
+  geom_vline(xintercept = 0, lty = 2) +
+  scale_x_continuous(label = label_dollar())
 ```
 
 ```{r}
 model_results %>% 
   ggplot(aes(sale_price_adj, .pred_dollar)) +
-  geom_abline() +
-  geom_smooth() +
-  coord_obs_pred()
+  #geom_abline() +
+  geom_density_2d_filled(contour_var = "count") +
+  #geom_smooth() +
+  #coord_obs_pred() +
+  scale_x_log10(label = label_dollar()) +
+  scale_y_log10(label = label_dollar()) +
+  guides(fill = guide_coloursteps()) +
+  labs(fill = "Sales")
 ```
 
 ```{r}
 model_results %>% 
   ggplot(aes(sale_price_adj, .resid)) +
-  geom_smooth()
+  geom_point(alpha = .1) +
+  scale_x_log10() +
+  labs(x = "Inflation-adjusted sale price log10 scale")
 ```
 
 ```{r}
@@ -109,57 +117,84 @@ geo_ids %>%
               color = "black",
               weight = 3) %>% 
   addLegend("bottomright", pal = pal, values = ~median_resid,
-            title = "Median of model residual",
+            title = "Median of residual",
             opacity = 1)
 ```
 
 ```{r fig.height=12}
 #fill by n
 model_results %>% 
+  add_count(geo_id) %>% 
   mutate(geo_id = fct_reorder(geo_id, .resid, .fun = median)) %>% 
-  ggplot(aes(.resid, geo_id)) +
-  geom_boxplot(outlier.alpha = 0) +
-  geom_vline(xintercept = 0, lty = 2, color = "red")
+  ggplot(aes(.resid, geo_id, fill = n)) +
+  geom_boxplot(color = "grey",
+               outlier.alpha = 0) +
+  geom_vline(xintercept = 0, lty = 2, color = "red") +
+  scale_fill_viridis_c() +
+  coord_cartesian(xlim = c(-10^5, 10^5)) +
+  labs(fill = "Sales")
 ```
 
 ```{r}
 #fill by n
 model_results %>% 
+  add_count(style_desc) %>% 
   mutate(style_desc = fct_reorder(style_desc, .resid, .fun = median)) %>% 
-  ggplot(aes(.resid, style_desc)) +
-  geom_boxplot(outlier.alpha = 0) +
-  geom_vline(xintercept = 0, lty = 2, color = "red")
+  ggplot(aes(.resid, style_desc, fill = n)) +
+  geom_boxplot(color = "grey",
+               outlier.alpha = 0) +
+  geom_vline(xintercept = 0, lty = 2, color = "red") +
+  coord_cartesian(xlim = c(-10.5^5, 10.5^5)) +
+  scale_x_continuous(labels = label_dollar()) +
+  scale_fill_viridis_c() +
+  labs(fill = "Sales")
 ```
 
 ```{r}
 #fill by n
 model_results %>% 
+  add_count(grade_desc) %>% 
   mutate(grade_desc = fct_reorder(grade_desc, .resid, .fun = median)) %>% 
-  ggplot(aes(.resid, grade_desc)) +
-  geom_boxplot(outlier.alpha = 0)
+  ggplot(aes(.resid, grade_desc, fill = n)) +
+  geom_boxplot(color = "grey",
+               outlier.alpha = 0) +
+  scale_fill_viridis_c() +
+  scale_x_continuous(labels = label_dollar()) +
+  coord_cartesian(xlim = c(-10^5, 10.5^6)) +
+  labs(fill = "Sales")
 ```
 
 ```{r}
 #fill by n
 model_results %>% 
-  mutate(condition_desc = fct_reorder(condition_desc, .resid, .fun = median)) %>% 
-  ggplot(aes(.resid, condition_desc)) +
-  geom_boxplot(outlier.alpha = 0) +
-  geom_vline(xintercept = 0, lty = 2, color = "red")
+  add_count(condition_desc) %>% 
+  mutate(condition_desc = fct_explicit_na(condition_desc),
+         condition_desc = fct_reorder(condition_desc, .resid, .fun = median)) %>% 
+  ggplot(aes(.resid, condition_desc, fill = n)) +
+  geom_boxplot(color = "grey",
+               outlier.alpha = 0) +
+  geom_vline(xintercept = 0, lty = 2, color = "red") +
+  scale_fill_viridis_c() +
+  scale_x_continuous(labels = label_dollar()) +
+  coord_cartesian(xlim = c(-10^5, 10.5^5)) +
+  labs(fill = "Sales")
 ```
 
 ```{r}
 model_results %>% 
   ggplot(aes(finished_living_area, .resid)) +
-  geom_smooth() +
-  scale_x_log10()
+  geom_point(alpha = .1) +
+  scale_x_log10() +
+  labs(x = "Finished Living Area sq. ft. log10 scale")
 ```
 
 ```{r}
 model_results %>% 
   ggplot(aes(lot_area, .resid)) +
-  geom_smooth() +
-  scale_x_log10()
+  geom_point(alpha = .1) +
+  scale_x_log10(labels = label_comma()) +
+  scale_y_continuous(labels = label_dollar()) +
+  labs(x = "Lot Area sq. ft. log10 scale")
 ```
 
 ```{r}
@@ -167,17 +202,20 @@ model_results %>%
   group_by(house_age_at_sale) %>% 
   rmse(truth = sale_price_adj, estimate = .pred_dollar) %>% 
   ggplot(aes(house_age_at_sale, .estimate)) +
-  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = label_dollar()) +
   labs(x = "House age at sale",
        y = "RMSE")
 ```
 
+The model is best at predicting the sale price of houses built in the 1940s to 1980s. This is when most of the houses in the county were built.
 ```{r}
 model_results %>% 
   group_by(year_built) %>% 
   rmse(truth = sale_price_adj, estimate = .pred_dollar) %>% 
   ggplot(aes(year_built, .estimate)) +
-  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = label_dollar()) +
   labs(x = "Year Built",
        y = "RMSE")
 ```
@@ -185,28 +223,46 @@ model_results %>%
 ```{r}
 #fill by n
 model_results %>% 
-  ggplot(aes(.resid, bedrooms, group = bedrooms)) +
-  geom_boxplot(outlier.alpha = .01) +
+  add_count(bedrooms) %>% 
+  ggplot(aes(.resid, bedrooms, group = bedrooms, fill = n)) +
+  geom_boxplot(color = "grey",
+               outlier.alpha = 0) +
   geom_vline(xintercept = 0, lty = 2, color = "red") +
-  scale_y_continuous(breaks = c(0:15))
+  scale_y_continuous(breaks = c(0:15)) +
+  scale_fill_viridis_c() +
+  scale_x_continuous(labels = label_dollar()) +
+  coord_cartesian(xlim = c(-10^5, 10^5)) +
+  labs(fill = "Sales")
 ```
 
 ```{r}
 #fill by n
 model_results %>% 
-  ggplot(aes(.resid, full_baths, group = full_baths)) +
-  geom_boxplot(outlier.alpha = .01) +
+  add_count(full_baths) %>% 
+  ggplot(aes(.resid, full_baths, group = full_baths, fill = n)) +
+  geom_boxplot(color = "grey",
+               outlier.alpha = 0) +
   geom_vline(xintercept = 0, lty = 2, color = "red") +
-  scale_y_continuous(breaks = c(0:12))
+  scale_y_continuous(breaks = c(0:12)) +
+  scale_fill_viridis_c() +
+  scale_x_continuous() +
+  coord_cartesian(xlim = c(-10^5, 10^6)) +
+  labs(fill = "Sales")
 ```
 
 ```{r}
 #fill by n
 model_results %>% 
-  ggplot(aes(.resid, half_baths, group = half_baths)) +
-  geom_boxplot(outlier.alpha = .01) +
+  add_count(half_baths) %>% 
+  ggplot(aes(.resid, half_baths, group = half_baths, fill = n)) +
+  geom_boxplot(color = "grey",
+               outlier.alpha = 0) +
   geom_vline(xintercept = 0, lty = 2, color = "red") +
-  scale_y_continuous(breaks = c(0:8))
+  scale_y_continuous(breaks = c(0:8)) +
+  scale_x_continuous(labels = label_dollar()) +
+  scale_fill_viridis_c() +
+  coord_cartesian(xlim = c(-10^5, 10^5)) +
+  labs(fill = "Sales")
 ```
 
 ```{r}
