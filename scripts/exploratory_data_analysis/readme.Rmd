@@ -3,10 +3,7 @@ title: "Assessment EDA"
 author: "Conor Tompkins"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    toc: true
-    code_folding: hide
-    keep_md: yes
+  github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -116,38 +113,25 @@ assessments_valid %>%
   scale_y_continuous(labels = label_dollar()) +
   coord_cartesian(ylim = c(0, 500000)) +
   scale_fill_viridis_c() +
-  labs(y = "Inflation-adjusted sale price")
+  labs(x = NULL,
+       y = "Inflation-adjusted sale price")
 ```
 
 ### Location
 
 The location of the house (`geo_id`) has a big impact on `sale_price_adj`.
-```{r, eval = F, include = F}
+```{r}
 geo_id_median_price <- assessments_valid %>% 
   group_by(geo_id) %>% 
   summarize(median_price = median(sale_price_adj))
 
-pal <- colorNumeric(
-  palette = "viridis",
-  domain = geo_id_median_price$median_price)
-
-geo_ids %>% 
-  left_join(geo_id_median_price) %>% 
-  leaflet() %>% 
-  addProviderTiles(providers$Stamen.TonerLite,
-                   options = providerTileOptions(noWrap = TRUE,
-                                                 minZoom = 9, 
-                                                 #maxZoom = 8
-                   )) %>% 
-  addPolygons(popup = ~ str_c(geo_id, " ", "median price: ", dollar(median_price), sep = ""),
-              fillColor = ~pal(median_price),
-              fillOpacity = .7,
-              color = "black",
-              weight = 3) %>% 
-  addLegend("bottomright", pal = pal, values = ~median_price,
-            title = "Median sale price",
-            labFormat = labelFormat(prefix = "$"),
-            opacity = 1)
+geo_id_median_price %>% 
+  left_join(geo_ids) %>% 
+  st_as_sf() %>% 
+  ggplot() +
+  geom_sf(aes(fill = median_price)) +
+  scale_fill_viridis_c(labels = dollar) +
+  labs(fill = "Median price")
 ```
 
 ```{r fig.height=16}
@@ -161,7 +145,8 @@ assessments_valid %>%
   scale_fill_viridis_c() +
   coord_cartesian(xlim = c(0, 500000)) +
   labs(fill = "Sales",
-       x = "Inflation-adjusted sale price")
+       x = "Inflation-adjusted sale price",
+       y = NULL)
 ```
 
 ### House Characteristics
@@ -173,7 +158,8 @@ assessments_valid %>%
   geom_density_2d_filled(contour_var = "count") +
   scale_y_log10(labels = dollar) +
   guides(fill = guide_colorsteps()) +
-  labs(y = "Inflation-adjusted sale price log10 scale",
+  labs(x = "House age at sale",
+       y = "Inflation-adjusted sale price log10 scale",
        fill = "Sales")
 ```
 
@@ -200,10 +186,10 @@ assessments_valid %>%
   ggplot(aes(lot_area, geo_id, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
-  #scale_x_log10() +
   scale_fill_viridis_c() +
   coord_cartesian(xlim = c(0, 50000)) +
   labs(x = "Lot Area sq. ft",
+       y = "School district",
        fill = "Sales")
 ```
 
@@ -215,10 +201,10 @@ assessments_valid %>%
   ggplot(aes(lot_area, style_desc, fill = n)) +
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
-  #scale_x_log10() +
   scale_fill_viridis_c() +
   coord_cartesian(xlim = c(0, 200000)) +
   labs(x = "Lot Area sq. ft.",
+       y = "Style",
        fill = "Sales")
 ```
 
@@ -248,6 +234,7 @@ assessments_valid %>%
   scale_x_log10() +
   scale_fill_viridis_c() +
   labs(x = "Finished Living Area sq. ft. log10 scale",
+       y = "Style",
        fill = "Sales")
 ```
 
@@ -260,9 +247,9 @@ assessments_valid %>%
   geom_boxplot(outlier.alpha = 0,
                color = "grey") +
   scale_x_log10() +
-  #coord_cartesian(xlim = c(0, 10000)) +
   scale_fill_viridis_c() +
   labs(x = "Finished Living Area sq. ft. log10 scale",
+       y = "School district",
        fill = "Sales")
 ```
 
@@ -279,6 +266,7 @@ assessments_valid %>%
   scale_x_log10(labels = dollar) +
   scale_fill_viridis_c() +
   labs(x = "Inflation-adjusted price log10 scale",
+       y = "Grade",
        fill = "Sales")
 ```
 
@@ -295,6 +283,7 @@ assessments_valid %>%
   scale_x_log10(labels = dollar) +
   scale_fill_viridis_c() +
   labs(x = "Inflation-adjusted price log10 scale",
+       y = "Condition",
        fill = "Sales")
 ```
 
@@ -304,7 +293,9 @@ assessments_valid %>%
   count(style_desc) %>% 
   mutate(style_desc = fct_reorder(style_desc, n, .fun = max)) %>% 
   ggplot(aes(n, style_desc)) +
-  geom_col()
+  geom_col() +
+  labs(x = "Sales",
+       y = "Style")
 ```
 
 Most houses that have been sold were built between 1940 and 1980.
@@ -312,7 +303,9 @@ Most houses that have been sold were built between 1940 and 1980.
 assessments_valid %>% 
   count(year_built) %>% 
   ggplot(aes(year_built, n)) +
-  geom_point()
+  geom_point() +
+  labs(x = "Year built",
+       y = "Count")
 ```
 
 There is some time-series pattern in when different types of houses were created.
@@ -324,7 +317,8 @@ assessments_valid %>%
   ggplot(aes(year_built, fill = style_desc)) +
   geom_histogram(binwdidth = 30) +
   guides(fill = "none") +
-  facet_wrap(~style_desc, scales = "free_y", ncol = 2)
+  facet_wrap(~style_desc, scales = "free_y", ncol = 2) +
+  labs(x = "Year built")
 ```
 
 #### Bathrooms
@@ -342,7 +336,9 @@ assessments_valid %>%
   scale_y_continuous(breaks = c(0:12),
                      expand = c(0,0)) +
   coord_equal() +
-  labs(fill = "Sales") +
+  labs(x = "Full baths",
+       y = "Half baths",
+       fill = "Sales") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 ```
@@ -358,6 +354,7 @@ assessments_valid %>%
   scale_y_continuous(breaks = c(0:12)) +
   scale_fill_viridis_c() +
   labs(x = "Inflation-adjusted price log10 scale",
+       y = "Full baths",
        fill = "Sales")
 ```
 
@@ -372,12 +369,13 @@ assessments_valid %>%
   scale_y_continuous(breaks = c(0:9)) +
   scale_fill_viridis_c() +
   labs(x = "Inflation-adjusted price log10 scale",
+       y = "Half baths",
        fill = "Sales")
 ```
 
 #### Heating and cooling
 
-Need to split these out to heat_type and ac_flag.
+I will split `heating_cooling_desc` into to `heat_type` and `ac_flag.`
 ```{r}
 assessments_valid %>% 
   mutate(heating_cooling_desc = fct_explicit_na(heating_cooling_desc),
@@ -404,6 +402,7 @@ assessments_valid %>%
   scale_x_log10(label = dollar) +
   scale_fill_viridis_c() +
   labs(x = "Inflation-adjusted price log10 scale",
+       y = "Heat type",
        fill = "Sales")
 ```
 
@@ -419,7 +418,9 @@ assessments_valid %>%
                color = "grey") +
   scale_x_log10(label = dollar) +
   scale_fill_viridis_c() +
-  labs(fill = "Sales")
+  labs(x = "Inflation-adjusted price log10 scale",
+       y = "AC",
+       fill = "Sales")
 ```
 
 #### Exterior
@@ -469,7 +470,8 @@ assessments_valid %>%
                color = "grey") +
   scale_x_log10(label = dollar) +
   scale_fill_viridis_c() +
-  labs(fill = "Sales")
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
 #### Basement garage
@@ -492,14 +494,14 @@ assessments_valid %>%
                color = "grey") +
   scale_x_log10(label = dollar) +
   scale_fill_viridis_c() +
-  labs(fill = "Sales")
+  labs(x = "Inflation-adjusted price log10 scale",
+       fill = "Sales")
 ```
 
 #### Fireplaces
 
 Positive relationship between number of fireplaces and sale price, but most houses have 1 or 2. Consider changing to lgl `fireplace_flag` column where it checks `fireplaces` >= 1.
 ```{r}
-#need to deal with missing fireplace rows
 max_fireplaces <- assessments_valid %>% 
   summarize(max(fireplaces, na.rm = T)) %>% 
   pull()
