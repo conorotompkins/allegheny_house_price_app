@@ -45,21 +45,8 @@ model_results <- read_csv(model_results_path) %>%
          .pred_dollar = 10^.pred,
          .resid = sale_price_adj - .pred_dollar)
 
-geo_ids <- st_read(unified_geo_ids_path)
-```
+geo_ids <- st_read(unified_geo_ids_path, quiet = T)
 
-```
-## Reading layer `unified_geo_ids' from data source 
-##   `/Users/conortompkins/github_repos/allegheny_house_price_app/data/cleaned/big/unified_geo_ids/unified_geo_ids.shp' 
-##   using driver `ESRI Shapefile'
-## Simple feature collection with 80 features and 7 fields
-## Geometry type: MULTIPOLYGON
-## Dimension:     XY
-## Bounding box:  xmin: -80.36 ymin: 40.19 xmax: -79.69 ymax: 40.67
-## Geodetic CRS:  WGS 84
-```
-
-```r
 metrics_train <- read_csv(model_metrics_train_path)
 
 metrics_test <- read_csv(model_metrics_test_path)
@@ -153,42 +140,23 @@ model_results %>%
 
 ![](readme_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
+The model has larger errors in the very wealthy neighborhoods.
 
 ```r
-geo_ids <- st_read(unified_geo_ids_path, quiet = T)
-
-geo_id_median_resid <- model_results %>% 
+geo_id_rmse <- model_results %>% 
   group_by(geo_id) %>% 
-  summarize(median_resid = median(.resid))
+  rmse(truth = sale_price_adj, estimate = .pred_dollar)
 
-pal <- colorNumeric(
-  palette = "viridis",
-  domain = geo_id_median_resid$median_resid)
-
-leaflet_map <- geo_ids %>% 
-  left_join(geo_id_median_resid) %>% 
-  leaflet() %>% 
-  addProviderTiles(providers$Stamen.TonerLite,
-                   options = providerTileOptions(noWrap = TRUE,
-                                                 minZoom = 9, 
-                                                 #maxZoom = 8
-                   )) %>% 
-  addPolygons(popup = ~ str_c(geo_id, " ", "median residual: ", round(median_resid, 2), sep = ""),
-              fillColor = ~pal(median_resid),
-              fillOpacity = .7,
-              color = "black",
-              weight = 3) %>% 
-  addLegend("bottomright", pal = pal, values = ~median_resid,
-            title = "Median of residual",
-            opacity = 1)
-
-widgetframe::frameWidget(leaflet_map)
+geo_id_rmse %>% 
+  left_join(geo_ids) %>% 
+  st_as_sf() %>% 
+  ggplot() +
+  geom_sf(aes(fill = .estimate)) +
+  scale_fill_viridis_c(labels = dollar) +
+  labs(fill = "RMSE")
 ```
 
-```{=html}
-<div id="htmlwidget-6ba10ed2e298ef796a7e" style="width:100%;height:480px;" class="widgetframe html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6ba10ed2e298ef796a7e">{"x":{"url":"readme_files/figure-html//widgets/widget_unnamed-chunk-7.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
-```
+![](readme_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 
 ```r
@@ -199,9 +167,11 @@ model_results %>%
   geom_boxplot(color = "grey",
                outlier.alpha = 0) +
   geom_vline(xintercept = 0, lty = 2, color = "red") +
+  scale_x_continuous(labels = dollar) +
   scale_fill_viridis_c() +
   coord_cartesian(xlim = c(-10^5, 10^5)) +
-  labs(fill = "Sales")
+  labs(x = "Residual",
+       fill = "Sales")
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-8-1.png)<!-- -->

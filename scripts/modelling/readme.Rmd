@@ -48,7 +48,7 @@ model_results <- read_csv(model_results_path) %>%
          .pred_dollar = 10^.pred,
          .resid = sale_price_adj - .pred_dollar)
 
-geo_ids <- st_read(unified_geo_ids_path)
+geo_ids <- st_read(unified_geo_ids_path, quiet = T)
 
 metrics_train <- read_csv(model_metrics_train_path)
 
@@ -96,35 +96,19 @@ model_results %>%
        y = "Residual")
 ```
 
+The model has larger errors in the very wealthy neighborhoods.
 ```{r}
-geo_ids <- st_read(unified_geo_ids_path, quiet = T)
-
-geo_id_median_resid <- model_results %>% 
+geo_id_rmse <- model_results %>% 
   group_by(geo_id) %>% 
-  summarize(median_resid = median(.resid))
+  rmse(truth = sale_price_adj, estimate = .pred_dollar)
 
-pal <- colorNumeric(
-  palette = "viridis",
-  domain = geo_id_median_resid$median_resid)
-
-leaflet_map <- geo_ids %>% 
-  left_join(geo_id_median_resid) %>% 
-  leaflet() %>% 
-  addProviderTiles(providers$Stamen.TonerLite,
-                   options = providerTileOptions(noWrap = TRUE,
-                                                 minZoom = 9, 
-                                                 #maxZoom = 8
-                   )) %>% 
-  addPolygons(popup = ~ str_c(geo_id, " ", "median residual: ", round(median_resid, 2), sep = ""),
-              fillColor = ~pal(median_resid),
-              fillOpacity = .7,
-              color = "black",
-              weight = 3) %>% 
-  addLegend("bottomright", pal = pal, values = ~median_resid,
-            title = "Median of residual",
-            opacity = 1)
-
-widgetframe::frameWidget(leaflet_map)
+geo_id_rmse %>% 
+  left_join(geo_ids) %>% 
+  st_as_sf() %>% 
+  ggplot() +
+  geom_sf(aes(fill = .estimate)) +
+  scale_fill_viridis_c(labels = dollar) +
+  labs(fill = "RMSE")
 ```
 
 ```{r fig.height=12}
@@ -135,9 +119,11 @@ model_results %>%
   geom_boxplot(color = "grey",
                outlier.alpha = 0) +
   geom_vline(xintercept = 0, lty = 2, color = "red") +
+  scale_x_continuous(labels = dollar) +
   scale_fill_viridis_c() +
   coord_cartesian(xlim = c(-10^5, 10^5)) +
-  labs(fill = "Sales")
+  labs(x = "Residual",
+       fill = "Sales")
 ```
 
 ```{r}
