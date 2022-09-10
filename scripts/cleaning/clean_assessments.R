@@ -101,8 +101,8 @@ assessments_valid <- assessments_valid %>%
 
 glimpse(assessments_valid)
 
-# assessments_valid %>% 
-#   skimr::skim()
+assessments_valid %>%
+  skimr::skim()
 
 #simplify condo and row end style desc types
 assessments_valid <- assessments_valid %>% 
@@ -147,13 +147,25 @@ assessments_valid <- assessments_valid %>%
 assessments_valid %>% 
   count(ac_flag, heat_type, heating_cooling_desc, sort = T)
 
-assessments_valid$sale_price_adj <- adjust_for_inflation(assessments_valid$sale_price, 
-                                                         from_date = assessments_valid$sale_year, 
+inflation_lookup <- assessments_valid %>% 
+  distinct(sale_price, sale_year) %>% 
+  mutate(sale_price_adj = NA)
+
+inflation_lookup$sale_price_adj <- adjust_for_inflation(inflation_lookup$sale_price, 
+                                                         from_date = inflation_lookup$sale_year, 
                                                          country = "US", 
                                                          #set everything to 2020 dollars
                                                          to_date = 2020)
+assessments_valid %>% 
+  left_join(inflation_lookup) %>% 
+  select(sale_price, sale_price_adj) %>% 
+  pivot_longer(cols = everything()) %>% 
+  ggplot(aes(value, fill = name)) +
+  geom_density() +
+  facet_wrap(~name, ncol = 1)
 
 glimpse(assessments_valid)
 
 assessments_valid %>% 
+  left_join(inflation_lookup) %>% 
   write_csv("data/cleaned/big/clean_assessment_data.csv")
