@@ -58,6 +58,7 @@ output/images
 #eda and modelling rmarkdown output HTML
 scripts/modelling/*.html
 scripts/exploratory_data_analysis/*.html
+scripts/exploratory_data_analysis/eda.html
 
 #shiny app modelling objects and data files
 house_price_app/*.rds
