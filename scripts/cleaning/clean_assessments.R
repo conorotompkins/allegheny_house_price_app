@@ -147,17 +147,33 @@ assessments_valid <- assessments_valid %>%
 assessments_valid %>% 
   count(ac_flag, heat_type, heating_cooling_desc, sort = T)
 
-inflation_lookup <- assessments_valid %>% 
+inflation_lookup <- assessments_valid %>%
   distinct(sale_price, sale_year) %>% 
   mutate(sale_price_adj = NA)
 
-inflation_lookup$sale_price_adj <- adjust_for_inflation(inflation_lookup$sale_price, 
-                                                         from_date = inflation_lookup$sale_year, 
-                                                         country = "US", 
-                                                         #set everything to 2020 dollars
-                                                         to_date = 2020)
+#from https://fred.stlouisfed.org/series/CPIAUCSL
+monthly_cpi <- read_csv("data/raw/CPIAUCSL.csv") %>% 
+  mutate(year = year(DATE)) %>% 
+  rename(cpi = CPIAUCSL,
+         date = DATE)
+
+yearly_cpi <- monthly_cpi %>% 
+  group_by(year) %>% 
+  summarize(cpi = mean(cpi))
+
+cpi_2022 <- yearly_cpi %>% 
+  filter(year == 2022) %>% 
+  pull()
+
+yearly_cpi <- yearly_cpi %>% 
+  mutate(adj_factor = cpi/cpi_2022)
+
+assessments_valid <- assessments_valid %>% 
+  left_join(yearly_cpi, by = c("sale_year" = "year")) %>% 
+  mutate(sale_price_adj = sale_price * adj_factor) %>% 
+  select(-c(cpi, adj_factor))
+
 assessments_valid %>% 
-  left_join(inflation_lookup) %>% 
   select(sale_price, sale_price_adj) %>% 
   pivot_longer(cols = everything()) %>% 
   ggplot(aes(value, fill = name)) +
@@ -167,5 +183,4 @@ assessments_valid %>%
 glimpse(assessments_valid)
 
 assessments_valid %>% 
-  left_join(inflation_lookup) %>% 
   write_csv("data/cleaned/big/clean_assessment_data.csv")
