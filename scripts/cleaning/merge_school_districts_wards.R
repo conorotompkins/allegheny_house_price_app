@@ -16,14 +16,20 @@ assessments_valid <- read_csv("data/cleaned/big/clean_assessment_data.csv") %>%
   mutate(school_desc = str_squish(school_desc))
 
 #school districts
-school_districts <- st_read("data/raw/big/Allegheny_County_School_District_Boundaries-shp/schooldistricts.shp") %>% 
+# from https://data.wprdc.org/dataset/allegheny-county-school-district-boundaries
+school_districts <- st_read("data/raw/big/alcogisallegheny-county-school-district-boundaries/schooldistricts.shp") %>% 
   st_transform(4326) %>% 
   mutate(center = st_centroid(geometry),
          lng = map_dbl(center, 1),
          lat = map_dbl(center, 2)) %>% 
   select(school_district = SCHOOLD, geometry)
 
+school_districts %>% 
+  ggplot() +
+  geom_sf()
+
 #council districts
+#from https://data.wprdc.org/dataset/city-council-districts-2012
 council_districts <- st_read("data/raw/big/City_Council_Districts_2012-shp/Council_Districts.shp") %>% 
   st_transform(4326) %>% 
   mutate(center = st_centroid(geometry),
@@ -34,6 +40,7 @@ council_districts <- st_read("data/raw/big/City_Council_Districts_2012-shp/Counc
 
 
 #enclave municipalities
+#from https://data.wprdc.org/dataset/allegheny-county-municipal-boundaries
 municipalities <- st_read("data/raw/big/Allegheny_County_Municipal_Boundaries-shp/LandRecords_LANDRECORDS_OWNER_Municipalities.shp") %>% 
   st_transform(4326) %>% 
   clean_names() %>% 
