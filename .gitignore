@@ -61,3 +61,5 @@ house_price_app/*.rds
 house_price_app/*.csv
 house_price_app/unified_geo_ids
 house_price_app/rsconnect
+
+*.html
