@@ -171,7 +171,7 @@ unified_geo_ids %>%
   st_drop_geometry() %>% 
   View()
 
-unlink("unified_geo_ids", recursive = T)
+unlink("data/cleaned/big/unified_geo_ids", recursive = T)
 
 dir.create("data/cleaned/big/unified_geo_ids")
 
