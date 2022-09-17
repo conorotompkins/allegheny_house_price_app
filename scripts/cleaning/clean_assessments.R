@@ -157,6 +157,8 @@ monthly_cpi <- read_csv("data/raw/CPIAUCSL.csv") %>%
   rename(cpi = CPIAUCSL,
          date = DATE)
 
+tail(monthly_cpi)
+
 yearly_cpi <- monthly_cpi %>% 
   group_by(year) %>% 
   summarize(cpi = mean(cpi))
@@ -170,7 +172,7 @@ yearly_cpi <- yearly_cpi %>%
 
 assessments_valid <- assessments_valid %>% 
   left_join(yearly_cpi, by = c("sale_year" = "year")) %>% 
-  mutate(sale_price_adj = sale_price * adj_factor) %>% 
+  mutate(sale_price_adj = sale_price / adj_factor) %>% 
   select(-c(cpi, adj_factor))
 
 assessments_valid %>% 
@@ -179,6 +181,25 @@ assessments_valid %>%
   ggplot(aes(value, fill = name)) +
   geom_density() +
   facet_wrap(~name, ncol = 1)
+
+assessments_valid %>%
+  select(sale_year, sale_price, sale_price_adj) %>% 
+  pivot_longer(cols = contains("sale_price")) %>% 
+  mutate(name = case_when(name == "sale_price" ~ "Nominal dollars",
+                          name == "sale_price_adj" ~ "Inflation-adjusted 2022 dollars")) %>% 
+  group_by(sale_year, name) %>% 
+  summarize(median_price = median(value)) %>% 
+  ggplot(aes(sale_year, median_price, color = name)) +
+  geom_line(size = 2) +
+  scale_y_continuous(labels = scales::dollar) +
+  labs(title = "Home Sale Prices in Allegheny County",
+       subtitle = "1975-2022",
+       x = "Sale Year",
+       y = "Median Price",
+       caption = "Conor Tompkins",
+       color = NULL) +
+  theme_ipsum(base_size = 18,
+              axis_title_size = 15)
 
 glimpse(assessments_valid)
 
