@@ -199,7 +199,8 @@ assessments_valid %>%
        caption = "Conor Tompkins",
        color = NULL) +
   theme_ipsum(base_size = 18,
-              axis_title_size = 15)
+              axis_title_size = 15) +
+  theme(legend.position = "bottom")
 
 glimpse(assessments_valid)
 
