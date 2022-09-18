@@ -16,7 +16,7 @@ vroom("data/raw/big/parcelcentroid2022_08wgs.csv") %>%
 
 parcel_geo <-  vroom("data/raw/big/parcelcentroid2022_08wgs.csv") %>% 
   clean_names() %>% 
-  select(intptlon10, intptlat10) %>% 
+  select(pin, intptlon10, intptlat10) %>% 
   rename(longitude = intptlon10,
          latitude = intptlat10) %>% 
   drop_na()
