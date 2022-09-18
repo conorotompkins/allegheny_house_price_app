@@ -7,7 +7,7 @@ theme_set(theme_ipsum())
 
 #options(scipen = 999, digits = 4)
 
-#https://data.wprdc.org/dataset/parcel-centroids-in-allegheny-county-with-geographic-identifiers/resource/adf1fd38-c374-4c4e-9094-5e53bd12419f
+#from https://data.wprdc.org/dataset/parcel-centroids-in-allegheny-county-with-geographic-identifiers/resource/adf1fd38-c374-4c4e-9094-5e53bd12419f
 #ned to see why this is not returning 0 rows. double precision?
 vroom("data/raw/big/parcelcentroid2022_08wgs.csv") %>% 
   clean_names() %>% 
