@@ -20,7 +20,6 @@ test_data  <- testing(data_split)
 
 bag_fit <- read_rds("data/modelling/objects/bag_model_fit_v.03.rds")
 
-
 bag_fit
 
 #compare predictions against training data across models
