@@ -59,6 +59,8 @@ output/images
 scripts/modelling/*.html
 scripts/exploratory_data_analysis/*.html
 scripts/exploratory_data_analysis/eda.html
+scripts/exploratory_data_analysis/*.md
+readme_files
 
 #shiny app modelling objects and data files
 house_price_app/*.rds
