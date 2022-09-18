@@ -51,7 +51,7 @@ mt_oliver <- municipalities %>%
   filter(municipality_name == "Mount Oliver Borough")
 
 #wards
-#from
+#from https://data.wprdc.org/dataset/wards/resource/cb7eb6a2-c0bd-439e-abf4-1657ec4b6a96
 wards <- st_read("data/raw/big/pittsburghpawards/Wards.shp") %>% 
   st_transform(4326) %>% 
   clean_names() %>% 
