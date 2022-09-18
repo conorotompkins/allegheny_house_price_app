@@ -60,7 +60,8 @@ scripts/modelling/*.html
 scripts/exploratory_data_analysis/*.html
 scripts/exploratory_data_analysis/eda.html
 scripts/exploratory_data_analysis/*.md
-scripts/exploratory_data_analysis/readme_files
+scripts/exploratory_data_analysis/readme_files/figure-
+scripts/exploratory_data_analysis/readme.md
 
 #shiny app modelling objects and data files
 house_price_app/*.rds
