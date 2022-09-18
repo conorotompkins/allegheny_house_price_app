@@ -1,7 +1,7 @@
 Assessment EDA
 ================
 Conor Tompkins
-2021-07-24
+2022-09-18
 
 The purpose of this document is to perform EDA on the
 `clean_assessments.csv` data to identify patterns in the data that will
@@ -43,110 +43,110 @@ geo_ids <- st_read(unified_geo_ids_path, quiet = T)
 glimpse(assessments_valid)
 ```
 
-    ## Rows: 157,925
+    ## Rows: 120,872
     ## Columns: 31
-    ## $ par_id               <chr> "0467B00005000000", "0481L00052000000", "0936P003…
-    ## $ usedesc              <chr> "SINGLE FAMILY", "TOWNHOUSE", "SINGLE FAMILY", "S…
-    ## $ muni_desc            <chr> "Glassport", "South Fayette", "Bell Acres", "Eliz…
-    ## $ sale_desc            <chr> "Valid Sale", "Other Valid", "Other Valid", "Vali…
-    ## $ sale_price           <dbl> 61000, 96000, 688250, 66000, 48000, 192000, 90000…
-    ## $ year_built           <dbl> 1945, 1979, 1958, 1915, 1927, 1950, 1974, 1985, 1…
-    ## $ style_desc           <chr> "Old Style", "Townhouse", "Contemporary", "Bungal…
-    ## $ bedrooms             <dbl> 3, 2, 4, 2, 2, 3, 4, 3, 2, 3, 4, 3, 3, 5, 4, 4, 2…
-    ## $ full_baths           <dbl> 1, 1, 4, 2, 1, 1, 2, 2, 1, 1, 1, 2, 1, 3, 2, 2, 1…
-    ## $ half_baths           <dbl> 0, 1, 2, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0…
-    ## $ finished_living_area <dbl> 1026, 1388, 4958, 1388, 840, 1167, 2132, 1760, 91…
-    ## $ lot_area             <dbl> 4680, 1373, 68346, 29673, 6806, 11979, 11784, 600…
-    ## $ grade_desc           <chr> "Average", "Average", "Very Good", "Average", "Be…
+    ## $ par_id               <chr> "0668L00360000000", "0815R00114000000", "0133G001…
+    ## $ usedesc              <chr> "SINGLE FAMILY", "SINGLE FAMILY", "SINGLE FAMILY"…
+    ## $ muni_desc            <chr> "Upper St. Clair", "Leet", "Munhall", "Elizabeth …
+    ## $ sale_desc            <chr> "Valid Sale", "Valid Sale", "Valid Sale", "Valid …
+    ## $ sale_price           <dbl> 158500, 64900, 48000, 71000, 90000, 89500, 92000,…
+    ## $ year_built           <dbl> 1950, 1970, 1927, 1960, 1974, 1950, 1950, 2019, 1…
+    ## $ style_desc           <chr> "Ranch", "Ranch", "Old Style", "Ranch", "Colonial…
+    ## $ bedrooms             <dbl> 3, 3, 2, 2, 4, 3, 3, 2, 2, 3, 2, 4, 3, 4, 1, 2, 3…
+    ## $ full_baths           <dbl> 1, 2, 1, 1, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 1, 1, 2…
+    ## $ half_baths           <dbl> 0, 1, 0, 0, 1, 0, 1, 2, 0, 1, 0, 1, 0, 1, 0, 0, 0…
+    ## $ finished_living_area <dbl> 1440, 1377, 840, 914, 2132, 1266, 1726, 2523, 875…
+    ## $ lot_area             <dbl> 61812, 20625, 6806, 36695, 11784, 7319, 15000, 20…
+    ## $ grade_desc           <chr> "Average", "Average", "Below Average", "Average",…
     ## $ condition_desc       <chr> "Average", "Average", "Average", "Average", "Aver…
-    ## $ extfinish_desc       <chr> "Brick", "Masonry Frame", "Brick", "Frame", "Fram…
-    ## $ roof_desc            <chr> "Shingle", "Shingle", "Metal", "Shingle", "Shingl…
+    ## $ extfinish_desc       <chr> "Stone", "Frame", "Frame", "Brick", "Masonry Fram…
+    ## $ roof_desc            <chr> "Shingle", "Shingle", "Shingle", "Shingle", "Shin…
     ## $ basement_desc        <chr> "Full", "Full", "Full", "Full", "Full", "Full", "…
-    ## $ cdu_desc             <chr> "Average", "Good", "Average", "Average", "Average…
-    ## $ heating_cooling_desc <chr> "Central Heat With AC", "Central Heat With AC", "…
-    ## $ fireplaces           <dbl> 0, 0, 2, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, NA, 1, …
-    ## $ basement_garage      <dbl> 0, 1, 2, 0, 0, 1, 2, 2, 0, 0, 0, 2, 1, 2, NA, 2, …
-    ## $ sale_year            <dbl> 2006, 2011, 2010, 1998, 2006, 2011, 1987, 1985, 2…
-    ## $ sale_month           <fct> Jun, Apr, Dec, Aug, Mar, Jun, Jul, Dec, May, Jan,…
-    ## $ school_desc          <chr> "South Allegheny", "South Fayette Twp", "Quaker V…
-    ## $ house_age_at_sale    <dbl> 61, 32, 52, 83, 79, 61, 13, 0, 29, 56, 70, 8, 37,…
-    ## $ ac_flag              <lgl> TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, …
+    ## $ cdu_desc             <chr> "Average", "Average", "Average", "Average", "Aver…
+    ## $ heating_cooling_desc <chr> "Central Heat", "Central Heat With AC", "Central …
+    ## $ fireplaces           <dbl> 1, 1, 0, 1, 1, 1, 1, NA, 0, NA, 0, 0, 1, 1, 0, NA…
+    ## $ basement_garage      <dbl> 0, 2, 0, 0, 2, 1, 1, NA, 1, 0, 2, 1, 1, 2, 0, NA,…
+    ## $ sale_year            <dbl> 2006, 1978, 2006, 2006, 1987, 2006, 1995, 2021, 2…
+    ## $ sale_month           <fct> Jan, Feb, Mar, Mar, Jul, Aug, May, Feb, Feb, Oct,…
+    ## $ school_desc          <chr> "Upper St Clair", "Quaker Valley", "Steel Valley"…
+    ## $ house_age_at_sale    <dbl> 56, 8, 79, 46, 13, 56, 45, 2, 60, 12, 45, 79, 36,…
+    ## $ ac_flag              <lgl> FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE…
     ## $ heat_type            <chr> "Central Heat", "Central Heat", "Central Heat", "…
-    ## $ sale_price_adj       <dbl> 78314, 110456, 816887, 104789, 61624, 220912, 204…
-    ## $ geo_id               <chr> "South Allegheny", "South Fayette Township", "Qua…
-    ## $ lng                  <dbl> -79.89, -80.12, -80.18, -79.87, -79.90, -79.88, -…
-    ## $ lat                  <dbl> 40.33, 40.33, 40.58, 40.27, 40.38, 40.49, 40.54, …
+    ## $ sale_price_adj       <dbl> 227437, 287708, 68877, 101880, 229104, 128427, 17…
+    ## $ geo_id               <chr> "Upper St. Clair Area", "Quaker Valley", "Steel V…
+    ## $ lng                  <dbl> -80.07, -80.21, -79.90, -79.83, -80.00, -79.83, -…
+    ## $ lat                  <dbl> 40.31, 40.57, 40.38, 40.27, 40.54, 40.48, 40.52, …
 
 ``` r
 skim(assessments_valid)
 ```
 
-|                                                  |                    |
-|:-------------------------------------------------|:-------------------|
-| Name                                             | assessments\_valid |
-| Number of rows                                   | 157925             |
-| Number of columns                                | 31                 |
-| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_   |                    |
-| Column type frequency:                           |                    |
-| character                                        | 15                 |
-| factor                                           | 1                  |
-| logical                                          | 1                  |
-| numeric                                          | 14                 |
-| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |                    |
-| Group variables                                  | None               |
+|                                                  |                   |
+|:-------------------------------------------------|:------------------|
+| Name                                             | assessments_valid |
+| Number of rows                                   | 120872            |
+| Number of columns                                | 31                |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_   |                   |
+| Column type frequency:                           |                   |
+| character                                        | 15                |
+| factor                                           | 1                 |
+| logical                                          | 1                 |
+| numeric                                          | 14                |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |                   |
+| Group variables                                  | None              |
 
 Data summary
 
 **Variable type: character**
 
-| skim\_variable         | n\_missing | complete\_rate | min | max | empty | n\_unique | whitespace |
-|:-----------------------|-----------:|---------------:|----:|----:|------:|----------:|-----------:|
-| par\_id                |          0 |              1 |  16 |  16 |     0 |    157924 |          0 |
-| usedesc                |          0 |              1 |   8 |  22 |     0 |        13 |          0 |
-| muni\_desc             |          0 |              1 |   4 |  23 |     0 |       174 |          0 |
-| sale\_desc             |          0 |              1 |  10 |  11 |     0 |         2 |          0 |
-| style\_desc            |          0 |              1 |   3 |  13 |     0 |        20 |          0 |
-| grade\_desc            |          0 |              1 |   4 |  13 |     0 |         7 |          0 |
-| condition\_desc        |         22 |              1 |   4 |   9 |     0 |         8 |          0 |
-| extfinish\_desc        |          1 |              1 |   3 |  14 |     0 |         8 |          0 |
-| roof\_desc             |        207 |              1 |   4 |   7 |     0 |         6 |          0 |
-| basement\_desc         |         30 |              1 |   4 |  10 |     0 |         5 |          0 |
-| cdu\_desc              |         26 |              1 |   4 |   9 |     0 |         8 |          0 |
-| heating\_cooling\_desc |         26 |              1 |   4 |  21 |     0 |        15 |          0 |
-| school\_desc           |          0 |              1 |   6 |  20 |     0 |        78 |          0 |
-| heat\_type             |         26 |              1 |   4 |  13 |     0 |         9 |          0 |
-| geo\_id                |          0 |              1 |   7 |  23 |     0 |        54 |          0 |
+| skim_variable        | n_missing | complete_rate | min | max | empty | n_unique | whitespace |
+|:---------------------|----------:|--------------:|----:|----:|------:|---------:|-----------:|
+| par_id               |         0 |             1 |  16 |  16 |     0 |   120872 |          0 |
+| usedesc              |         0 |             1 |   8 |  22 |     0 |       13 |          0 |
+| muni_desc            |         0 |             1 |   4 |  23 |     0 |      174 |          0 |
+| sale_desc            |         0 |             1 |  10 |  11 |     0 |        2 |          0 |
+| style_desc           |         0 |             1 |   3 |  13 |     0 |       20 |          0 |
+| grade_desc           |         0 |             1 |   4 |  13 |     0 |        7 |          0 |
+| condition_desc       |        12 |             1 |   4 |   9 |     0 |        8 |          0 |
+| extfinish_desc       |         1 |             1 |   3 |  14 |     0 |        8 |          0 |
+| roof_desc            |       164 |             1 |   4 |   7 |     0 |        6 |          0 |
+| basement_desc        |        17 |             1 |   4 |  10 |     0 |        5 |          0 |
+| cdu_desc             |        10 |             1 |   4 |   9 |     0 |        8 |          0 |
+| heating_cooling_desc |        14 |             1 |   4 |  21 |     0 |       15 |          0 |
+| school_desc          |         0 |             1 |   6 |  20 |     0 |       78 |          0 |
+| heat_type            |        14 |             1 |   4 |  13 |     0 |        9 |          0 |
+| geo_id               |         0 |             1 |   7 |  23 |     0 |       54 |          0 |
 
 **Variable type: factor**
 
-| skim\_variable | n\_missing | complete\_rate | ordered | n\_unique | top\_counts                                    |
-|:---------------|-----------:|---------------:|:--------|----------:|:-----------------------------------------------|
-| sale\_month    |          0 |              1 | FALSE   |        12 | Jun: 16781, Jul: 16754, Aug: 16503, May: 14878 |
+| skim_variable | n_missing | complete_rate | ordered | n_unique | top_counts                                     |
+|:--------------|----------:|--------------:|:--------|---------:|:-----------------------------------------------|
+| sale_month    |         0 |             1 | FALSE   |       12 | Jun: 12783, Jul: 12356, Aug: 12134, May: 11874 |
 
 **Variable type: logical**
 
-| skim\_variable | n\_missing | complete\_rate | mean | count                   |
-|:---------------|-----------:|---------------:|-----:|:------------------------|
-| ac\_flag       |         26 |              1 | 0.65 | TRU: 101971, FAL: 55928 |
+| skim_variable | n_missing | complete_rate | mean | count                  |
+|:--------------|----------:|--------------:|-----:|:-----------------------|
+| ac_flag       |        14 |             1 | 0.65 | TRU: 78978, FAL: 41880 |
 
 **Variable type: numeric**
 
-| skim\_variable         | n\_missing | complete\_rate |      mean |        sd |      p0 |      p25 |       p50 |       p75 |       p100 | hist  |
-|:-----------------------|-----------:|---------------:|----------:|----------:|--------:|---------:|----------:|----------:|-----------:|:------|
-| sale\_price            |          0 |           1.00 | 130055.93 | 126771.46 |  325.00 | 55000.00 |  92500.00 | 160600.00 | 3070000.00 | ▇▁▁▁▁ |
-| year\_built            |          0 |           1.00 |   1950.83 |     29.69 | 1800.00 |  1930.00 |   1953.00 |   1970.00 |    2020.00 | ▁▁▅▇▃ |
-| bedrooms               |          8 |           1.00 |      3.06 |      0.88 |    0.00 |     3.00 |      3.00 |      4.00 |      14.00 | ▂▇▁▁▁ |
-| full\_baths            |         20 |           1.00 |      1.50 |      0.67 |    0.00 |     1.00 |      1.00 |      2.00 |      12.00 | ▇▁▁▁▁ |
-| half\_baths            |        997 |           0.99 |      0.54 |      0.57 |    0.00 |     0.00 |      0.00 |      1.00 |       9.00 | ▇▁▁▁▁ |
-| finished\_living\_area |          0 |           1.00 |   1703.14 |    761.18 |    0.00 |  1188.00 |   1512.00 |   2031.00 |   12790.00 | ▇▁▁▁▁ |
-| lot\_area              |          0 |           1.00 |  13222.54 |  37790.03 |    0.00 |  3980.00 |   7521.00 |  12981.00 | 4859466.00 | ▇▁▁▁▁ |
-| fireplaces             |       9040 |           0.94 |      0.43 |      0.57 |    0.00 |     0.00 |      0.00 |      1.00 |       7.00 | ▇▁▁▁▁ |
-| basement\_garage       |       4046 |           0.97 |      0.79 |      0.84 |    0.00 |     0.00 |      1.00 |      1.00 |       6.00 | ▇▂▁▁▁ |
-| sale\_year             |          0 |           1.00 |   2002.01 |     11.96 | 1976.00 |  1993.00 |   2003.00 |   2013.00 |    2021.00 | ▃▆▇▇▇ |
-| house\_age\_at\_sale   |          0 |           1.00 |     51.19 |     30.52 |    0.00 |    28.00 |     50.00 |     71.00 |     219.00 | ▇▇▂▁▁ |
-| sale\_price\_adj       |          0 |           1.00 | 179798.20 | 149366.07 |  417.25 | 91448.57 | 142828.85 | 219234.73 | 3507768.06 | ▇▁▁▁▁ |
-| lng                    |          0 |           1.00 |    -79.97 |      0.12 |  -80.35 |   -80.05 |    -79.98 |    -79.88 |     -79.70 | ▁▂▇▆▂ |
-| lat                    |          0 |           1.00 |     40.45 |      0.09 |   40.20 |    40.38 |     40.44 |     40.51 |      40.67 | ▁▅▇▅▂ |
+| skim_variable        | n_missing | complete_rate |      mean |        sd |      p0 |       p25 |       p50 |       p75 |       p100 | hist  |
+|:---------------------|----------:|--------------:|----------:|----------:|--------:|----------:|----------:|----------:|-----------:|:------|
+| sale_price           |         0 |          1.00 | 143097.56 | 144616.37 |  325.00 |  54950.00 |  99900.00 | 181000.00 | 3125000.00 | ▇▁▁▁▁ |
+| year_built           |         0 |          1.00 |   1951.05 |     29.54 | 1755.00 |   1930.00 |   1954.00 |   1970.00 |    2021.00 | ▁▁▂▇▃ |
+| bedrooms             |         2 |          1.00 |      3.06 |      0.87 |    0.00 |      3.00 |      3.00 |      4.00 |      14.00 | ▂▇▁▁▁ |
+| full_baths           |        14 |          1.00 |      1.50 |      0.66 |    0.00 |      1.00 |      1.00 |      2.00 |      12.00 | ▇▁▁▁▁ |
+| half_baths           |       785 |          0.99 |      0.54 |      0.58 |    0.00 |      0.00 |      1.00 |      1.00 |       8.00 | ▇▁▁▁▁ |
+| finished_living_area |         0 |          1.00 |   1697.56 |    753.59 |  342.00 |   1190.00 |   1512.00 |   2016.00 |   12790.00 | ▇▁▁▁▁ |
+| lot_area             |         0 |          1.00 |  13099.58 |  37728.66 |    0.00 |   4000.00 |   7593.00 |  12921.00 | 4859466.00 | ▇▁▁▁▁ |
+| fireplaces           |      7035 |          0.94 |      0.43 |      0.57 |    0.00 |      0.00 |      0.00 |      1.00 |       9.00 | ▇▁▁▁▁ |
+| basement_garage      |      3104 |          0.97 |      0.80 |      0.84 |    0.00 |      0.00 |      1.00 |      1.00 |       6.00 | ▇▂▁▁▁ |
+| sale_year            |         0 |          1.00 |   2002.93 |     13.94 | 1976.00 |   1991.00 |   2005.00 |   2016.00 |    2022.00 | ▃▅▂▅▇ |
+| house_age_at_sale    |         0 |          1.00 |     51.88 |     30.70 |    0.00 |     28.00 |     50.00 |     72.00 |     265.00 | ▇▆▁▁▁ |
+| sale_price_adj       |         0 |          1.00 | 210002.63 | 171827.20 |  466.35 | 107644.67 | 168838.32 | 257119.69 | 3877278.56 | ▇▁▁▁▁ |
+| lng                  |         0 |          1.00 |    -79.97 |      0.12 |  -80.34 |    -80.05 |    -79.98 |    -79.89 |     -79.70 | ▁▂▇▅▂ |
+| lat                  |         0 |          1.00 |     40.45 |      0.09 |   40.20 |     40.38 |     40.44 |     40.51 |      40.67 | ▁▅▇▅▂ |
 
 ### Sales Price
 
@@ -163,16 +163,15 @@ assessments_valid %>%
 
 ![](readme_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-Adjusting for inflation (`sale_price_adj` is in 2020 dollars) removes a
+Adjusting for inflation (`sale_price_adj` is in 2022 dollars) removes a
 lot of the drift over time.
 
 ``` r
 assessments_valid %>%
   select(sale_year, sale_price, sale_price_adj) %>% 
-  filter(sale_year < 2021) %>% 
   pivot_longer(cols = contains("sale_price")) %>% 
   mutate(name = case_when(name == "sale_price" ~ "Nominal dollars",
-                          name == "sale_price_adj" ~ "Inflation-adjusted 2020 dollars")) %>% 
+                          name == "sale_price_adj" ~ "Inflation-adjusted 2022 dollars")) %>% 
   group_by(sale_year, name) %>% 
   summarize(median_price = median(value)) %>% 
   ggplot(aes(sale_year, median_price, color = name)) +
@@ -185,21 +184,16 @@ assessments_valid %>%
 
 ![](readme_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
-House sales have plateaued since the 2008 mortgage crisis, with more
-year-to-year variation.
+House sales have accelerated since 2010.
 
 ``` r
 sale_year_count <- assessments_valid %>% 
   count(sale_year)
 
 sale_year_count %>% 
-  mutate(year_flag = case_when(sale_year == 2021 ~ "2021",
-                               sale_year < 2021 ~ "Before 2021")) %>% 
   ggplot(aes(sale_year, n)) +
-  geom_smooth(data = sale_year_count %>% 
-                filter(sale_year != 2021),
-              se = F) +
-  geom_point(aes(color = year_flag)) +
+  geom_smooth(se = F) +
+  geom_point() +
   labs(x = "Sale Year",
        y = "Sales",
        color = NULL)
@@ -257,7 +251,7 @@ assessments_valid %>%
                color = "grey") +
   scale_x_continuous(label = dollar) +
   scale_fill_viridis_c() +
-  coord_cartesian(xlim = c(0, 500000)) +
+  coord_cartesian(xlim = c(0, 800000)) +
   labs(fill = "Sales",
        x = "Inflation-adjusted sale price",
        y = NULL)
@@ -694,7 +688,7 @@ assessments_valid %>%
 
 Positive relationship between number of fireplaces and sale price, but
 most houses have 1 or 2. Consider changing to lgl `fireplace_flag`
-column where it checks `fireplaces` &gt;= 1.
+column where it checks `fireplaces` \>= 1.
 
 ``` r
 max_fireplaces <- assessments_valid %>% 
