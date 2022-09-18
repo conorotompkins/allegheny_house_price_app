@@ -101,8 +101,8 @@ assessments_valid <- assessments_valid %>%
 
 glimpse(assessments_valid)
 
-# assessments_valid %>% 
-#   skimr::skim()
+assessments_valid %>%
+  skimr::skim()
 
 #simplify condo and row end style desc types
 assessments_valid <- assessments_valid %>% 
@@ -147,11 +147,60 @@ assessments_valid <- assessments_valid %>%
 assessments_valid %>% 
   count(ac_flag, heat_type, heating_cooling_desc, sort = T)
 
-assessments_valid$sale_price_adj <- adjust_for_inflation(assessments_valid$sale_price, 
-                                                         from_date = assessments_valid$sale_year, 
-                                                         country = "US", 
-                                                         #set everything to 2020 dollars
-                                                         to_date = 2020)
+inflation_lookup <- assessments_valid %>%
+  distinct(sale_price, sale_year) %>% 
+  mutate(sale_price_adj = NA)
+
+#from https://fred.stlouisfed.org/series/CPIAUCSL
+monthly_cpi <- read_csv("data/raw/CPIAUCSL.csv") %>% 
+  mutate(year = year(DATE)) %>% 
+  rename(cpi = CPIAUCSL,
+         date = DATE)
+
+tail(monthly_cpi)
+
+yearly_cpi <- monthly_cpi %>% 
+  group_by(year) %>% 
+  summarize(cpi = mean(cpi))
+
+cpi_2022 <- yearly_cpi %>% 
+  filter(year == 2022) %>% 
+  pull()
+
+yearly_cpi <- yearly_cpi %>% 
+  mutate(adj_factor = cpi/cpi_2022)
+
+assessments_valid <- assessments_valid %>% 
+  left_join(yearly_cpi, by = c("sale_year" = "year")) %>% 
+  mutate(sale_price_adj = sale_price / adj_factor) %>% 
+  select(-c(cpi, adj_factor))
+
+assessments_valid %>% 
+  select(sale_price, sale_price_adj) %>% 
+  pivot_longer(cols = everything()) %>% 
+  ggplot(aes(value, fill = name)) +
+  geom_density() +
+  facet_wrap(~name, ncol = 1)
+
+assessments_valid %>%
+  select(sale_year, sale_price, sale_price_adj) %>% 
+  pivot_longer(cols = contains("sale_price")) %>% 
+  mutate(name = case_when(name == "sale_price" ~ "Nominal dollars",
+                          name == "sale_price_adj" ~ "Inflation-adjusted 2022 dollars")) %>% 
+  group_by(sale_year, name) %>% 
+  summarize(median_price = median(value)) %>% 
+  ggplot(aes(sale_year, median_price, color = name)) +
+  geom_line(size = 2) +
+  scale_y_continuous(labels = scales::dollar) +
+  labs(title = "Home Sale Prices in Allegheny County",
+       subtitle = "1975-2022",
+       x = "Sale Year",
+       y = "Median Price",
+       caption = "Conor Tompkins",
+       color = NULL) +
+  theme_ipsum(base_size = 18,
+              axis_title_size = 15) +
+  theme(legend.position = "bottom")
 
 glimpse(assessments_valid)
 

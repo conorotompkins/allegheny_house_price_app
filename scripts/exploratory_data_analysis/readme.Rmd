@@ -65,14 +65,13 @@ assessments_valid %>%
   labs(x = "Inflation-adjusted sale price log10 scale")
 ```
 
-Adjusting for inflation (`sale_price_adj` is in 2020 dollars) removes a lot of the drift over time.
+Adjusting for inflation (`sale_price_adj` is in 2022 dollars) removes a lot of the drift over time.
 ```{r}
 assessments_valid %>%
   select(sale_year, sale_price, sale_price_adj) %>% 
-  filter(sale_year < 2021) %>% 
   pivot_longer(cols = contains("sale_price")) %>% 
   mutate(name = case_when(name == "sale_price" ~ "Nominal dollars",
-                          name == "sale_price_adj" ~ "Inflation-adjusted 2020 dollars")) %>% 
+                          name == "sale_price_adj" ~ "Inflation-adjusted 2022 dollars")) %>% 
   group_by(sale_year, name) %>% 
   summarize(median_price = median(value)) %>% 
   ggplot(aes(sale_year, median_price, color = name)) +
@@ -83,19 +82,15 @@ assessments_valid %>%
        color = NULL)
 ```
 
-House sales have plateaued since the 2008 mortgage crisis, with more year-to-year variation.
+House sales have accelerated since 2010.
 ```{r}
 sale_year_count <- assessments_valid %>% 
   count(sale_year)
 
 sale_year_count %>% 
-  mutate(year_flag = case_when(sale_year == 2021 ~ "2021",
-                               sale_year < 2021 ~ "Before 2021")) %>% 
   ggplot(aes(sale_year, n)) +
-  geom_smooth(data = sale_year_count %>% 
-                filter(sale_year != 2021),
-              se = F) +
-  geom_point(aes(color = year_flag)) +
+  geom_smooth(se = F) +
+  geom_point() +
   labs(x = "Sale Year",
        y = "Sales",
        color = NULL)
@@ -143,7 +138,7 @@ assessments_valid %>%
                color = "grey") +
   scale_x_continuous(label = dollar) +
   scale_fill_viridis_c() +
-  coord_cartesian(xlim = c(0, 500000)) +
+  coord_cartesian(xlim = c(0, 800000)) +
   labs(fill = "Sales",
        x = "Inflation-adjusted sale price",
        y = NULL)

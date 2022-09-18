@@ -84,8 +84,7 @@ joined_geo <- joined_geo %>%
   
 joined_geo %>% 
   st_drop_geometry() %>% 
-  count(geo_id, sort = T) %>% 
-  View()
+  count(geo_id, sort = T)
 
 joined_geo %>% 
   st_drop_geometry() %>% 

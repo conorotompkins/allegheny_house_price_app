@@ -10,16 +10,18 @@ You can view the app [here](https://conorotompkins.shinyapps.io/shiny_app/)
     * clean_assessments.R
 2. Create crosswalk of geographic IDs
     * merge_school_districts_wards.R
-3. Join assessments with geo_id crosswalk
+4. Clean parcel geometry
+    * clean_parcel_geo.R
+5. Join assessments with geo_id crosswalk
     * geocode_parcels.R
-4. EDA
+6. EDA
     * eda/assessment_eda.Rmd
-5. Compare model performance
+7. Compare model performance
     * compare_model_performance.R
-6. Compare model timing
+8. Compare model timing
     * model_timing.R
-7. Choose final model
+9. Choose final model
     * choose_model.R
-8. Fit model and predict results
-9. Review model results
-10. Shiny App
+10. Fit model and predict results
+11. Review model results
+12. Shiny App
