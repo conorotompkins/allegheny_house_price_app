@@ -1,5 +1,5 @@
 #specify bagged tree model
-future::plan("multicore")
+future::plan("multisession")
 
 bag_spec <- bag_tree(min_n = 25) %>%
   set_engine("rpart", 

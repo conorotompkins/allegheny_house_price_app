@@ -20,7 +20,6 @@ test_data  <- testing(data_split)
 
 bag_fit <- read_rds("data/modelling/objects/bag_model_fit_v.03.rds")
 
-
 bag_fit
 
 #compare predictions against training data across models
@@ -43,67 +42,8 @@ test_predictions_scatter_bagged %>%
          height = 12)
 
 #eda results
-lm_rmse_chart <- lm_fit %>%
-  predict(train_data) %>%
-  bind_cols(train_data) %>%
-  group_by(geo_id) %>%
-  rmse(log10(sale_price_adj), .pred) %>%
-  mutate(geo_id = fct_reorder(geo_id, .estimate)) %>%
-  ggplot(aes(.estimate, geo_id)) +
-  geom_point()
-
-lm_rmse_chart %>% 
-  ggsave(filename = "output/images/lm_rmse_chart.png", height = 12)
-
-lm_term_coefficient_chart <- lm_fit %>%
-  pull_workflow_fit() %>%
-  tidy() %>%
-  filter(term != "(Intercept)") %>%
-  mutate(term_type = case_when(str_detect(term, "^geo_id") ~ "geo_id",
-                               str_detect(term, "^grade_desc_") ~ "grade_desc",
-                               str_detect(term, "^condition_desc_") ~ "condition_desc",
-                               str_detect(term, "^style_desc_") ~ "style_desc",
-                               TRUE ~ "other")) %>% 
-  add_count(term_type, name = "term_type_count") %>% 
-  mutate(term = str_remove(term, term_type)) %>% 
-  mutate(term_type = fct_reorder(term_type, term_type_count)) %>% 
-  mutate(term = tidytext::reorder_within(term, estimate, term_type)) %>%
-  ggplot(aes(estimate, term)) +
-  geom_vline(xintercept = 0, lty = 2) +
-  geom_point() +
-  facet_wrap(~term_type, scales = "free", nrow = 3) +
-  tidytext::scale_y_reordered()
-
-lm_term_coefficient_chart %>% 
-  ggsave(filename = "output/images/lm_term_coefficient_chart.png", height = 18, width = 12)
-
-#rf vi chart
-rf_vi_chart <- rf_fit %>%
-  pull_workflow_fit() %>%
-  vi() %>% 
-  rename(term = Variable,
-         importance = Importance) %>% 
-  mutate(term_type = case_when(str_detect(term, "^geo_id") ~ "geo_id",
-                               str_detect(term, "^grade_desc_") ~ "grade_desc",
-                               str_detect(term, "^condition_desc_") ~ "condition_desc",
-                               str_detect(term, "^style_desc_") ~ "style_desc",
-                               str_detect(term, "^sale_month_") ~ "sale_month",
-                               TRUE ~ "other")) %>% 
-  mutate(term = str_remove(term, term_type)) %>% 
-  mutate(term_type = fct_reorder(term_type, importance, .fun = max, .desc = T)) %>% 
-  mutate(term = tidytext::reorder_within(term, importance, term_type)) %>%
-  ggplot(aes(importance, term)) +
-  #geom_vline(xintercept = 0, lty = 2) +
-  geom_point() +
-  facet_wrap(~term_type, scales = "free", nrow = 3) +
-  tidytext::scale_y_reordered()
-
-rf_vi_chart %>% 
-  ggsave(filename = "output/images/rf_vi_chart.png", height = 18, width = 12)
-
-#need to find var imp in bagged tree model
 bagged_tree_vi <- bag_fit %>% 
-  pull_workflow_fit() %>% 
+  extract_fit_parsnip() %>% 
   .[['fit']] %>%
   var_imp()
 
@@ -114,7 +54,8 @@ bagged_tree_vi_chart <- bagged_tree_vi %>%
                                str_detect(term, "^style_desc_") ~ "style_desc",
                                str_detect(term, "^sale_month_") ~ "sale_month",
                                TRUE ~ "other")) %>% 
-  mutate(term = str_remove(term, term_type)) %>% 
+  mutate(term = str_remove(term, term_type),
+         term = str_remove(term, "^_")) %>% 
   mutate(term_type = fct_reorder(term_type, value, .fun = max, .desc = T)) %>% 
   mutate(term = tidytext::reorder_within(term, value, term_type)) %>%
   ggplot(aes(value, term)) +
