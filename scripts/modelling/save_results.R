@@ -40,7 +40,5 @@ bagged_rsq_chart %>%
          width = 8, height = 12)
 
 #bag model full results
-bag_fit %>% 
-  predict(housing_sales) %>% 
-  bind_cols(housing_sales) %>% 
+full_results %>% 
   write_csv("data/modelling/results/bag_full_model_results.csv")
