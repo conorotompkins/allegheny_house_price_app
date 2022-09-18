@@ -1,7 +1,7 @@
 wflow_id,timing,type,model,recipe
-rf_wflow_standard_fit_time,28.806,fit,rf,standard
-rf_wflow_dummy_fit_time,79.86,fit,rf,dummy
-bag_wflow_dummy_fit_time,187.71599999999998,fit,bag,dummy
-bag_wflow_dummy_pred_time,0.883,pred,bag,dummy
-rf_wflow_dummy_pred_time,1.1900000000000002,pred,rf,dummy
-rf_wflow_standard_pred_time,1.298,pred,rf,standard
+rf_wflow_standard_fit_time,23.968999999999998,fit,rf,standard
+rf_wflow_dummy_fit_time,66.67999999999999,fit,rf,dummy
+bag_wflow_dummy_fit_time,107.04100000000001,fit,bag,dummy
+rf_wflow_dummy_pred_time,1.129,pred,rf,dummy
+bag_wflow_dummy_pred_time,1.315,pred,bag,dummy
+rf_wflow_standard_pred_time,1.321,pred,rf,standard
