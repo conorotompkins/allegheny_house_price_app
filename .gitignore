@@ -48,6 +48,7 @@ big
 data/modelling/*.rds
 data/modelling/objects
 data/modelling/results
+data/modelling/metrics
 data/raw
 
 #saved images
