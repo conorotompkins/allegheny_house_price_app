@@ -83,8 +83,8 @@ wards <- wards %>%
 
 municipalities %>%
   distinct(municipality_name) %>%
-  st_drop_geometry() %>%
-  View()
+  st_drop_geometry() %>% 
+  as_tibble()
 
 school_districts %>%
   glimpse()
@@ -129,7 +129,7 @@ school_districts %>%
   bind_rows(council_districts) %>%
   bind_rows(mt_oliver) %>%
   st_drop_geometry() %>%
-  View()
+  tail()
 
 unified_geo_ids <- school_districts %>% 
   filter(school_district != "City of Pittsburgh") %>% 
@@ -169,7 +169,7 @@ unified_geo_ids %>%
 
 unified_geo_ids %>% 
   st_drop_geometry() %>% 
-  View()
+  as_tibble()
 
 unlink("data/cleaned/big/unified_geo_ids", recursive = T)
 
