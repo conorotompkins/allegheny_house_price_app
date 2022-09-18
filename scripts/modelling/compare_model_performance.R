@@ -119,7 +119,7 @@ lm_mod <- linear_reg() %>%
   set_engine("lm")
 
 #specify rf model
-cores <- parallel::detectCores()
+cores <- parallel::detectCores() - 1
 cores
 
 rf_mod <- rand_forest() %>% 
@@ -130,7 +130,7 @@ rf_mod <- rand_forest() %>%
   set_mode("regression")
 
 #specify bagged tree model
-future::plan("multicore")
+future::plan("multisession")
 bag_spec <- bag_tree(min_n = 25) %>%
   set_engine("rpart", 
              times = 25,
@@ -174,7 +174,7 @@ grid_results <-
     verbose = T
   )
 toc()
-#2824.896 sec elapsed
+#3324.361 sec elapsed
 
 grid_results %>% 
   distinct(wflow_id)
