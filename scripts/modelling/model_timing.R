@@ -9,7 +9,7 @@ rf_wflow_dummy <- workflow() %>%
   add_recipe(model_recipe_dummy)
 
 #create bagged tree model
-future::plan("multicore")
+future::plan("multisession")
 bag_spec <- bag_tree(min_n = 25) %>%
   set_engine("rpart", 
              times = 25,
