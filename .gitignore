@@ -44,8 +44,8 @@ vignettes/*.pdf
 #big files
 big
 
-scripts/*/*.html
-scripts/*/*.png
+scripts/**/*.html
+scripts/**/*.png
 
 #modelling objects
 data/modelling/*.rds
