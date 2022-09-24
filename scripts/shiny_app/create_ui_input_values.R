@@ -1,17 +1,18 @@
 library(tidyverse)
 library(janitor)
 library(glue)
+library(vroom)
 
 assessments <- read_csv("data/cleaned/big/clean_assessment_data_geocoded.csv")
 parcel_geo <- read_csv("data/cleaned/big/clean_parcel_geo.csv")
 
 assessments %>% 
   count(geo_id, sort = T) %>% 
-  write_csv("shiny_app/geo_id_distinct.csv")
+  write_csv("house_price_app/geo_id_distinct.csv")
 
 assessments %>% 
   count(style_desc, sort = T) %>%
-  write_csv("shiny_app/style_desc_distinct.csv")
+  write_csv("house_price_app/style_desc_distinct.csv")
 
 assessments %>% 
   distinct(grade_desc) %>% 
@@ -23,7 +24,7 @@ assessments %>%
                                                     "Below Average",
                                                     "Poor"))) %>% 
   arrange(grade_desc) %>% 
-  write_csv("shiny_app/grade_desc_distinct.csv")
+  write_csv("house_price_app/grade_desc_distinct.csv")
 
 assessments %>% 
   distinct(condition_desc) %>% 
@@ -38,41 +39,43 @@ assessments %>%
     "Very Poor",
     "Unsound"))) %>% 
   arrange(condition_desc) %>% 
-  write_csv("shiny_app/condition_desc_distinct.csv")
+  write_csv("house_price_app/condition_desc_distinct.csv")
 
 #copy fit model from data/modelling/objects to shiny_app/
 file.copy(from = "data/modelling/objects/bag_model_fit_v.03.rds",
-          to = "shiny_app/bag_model_fit_v.03.rds")
+          to = "house_price_app/bag_model_fit_v.03.rds")
 
 copy_unified_geos_shapefiles <- function(){
   
-  dir_exists_check <- dir.exists("shiny_app/unified_geo_ids")
+  dir_exists_check <- dir.exists("house_price_app/unified_geo_ids")
   
-  glue('"shiny_app/unified_geo_ids" exists:', dir_exists_check, .sep = " ") %>% 
+  glue('"house_price_app/unified_geo_ids" exists:', dir_exists_check, .sep = " ") %>% 
     message()
   
-  dir_populated <- list.files("shiny_app/unified_geo_ids") %>% 
+  dir_populated <- list.files("house_price_app/unified_geo_ids") %>% 
     length() == 4
   
-  glue('"shiny_app/unified_geo_ids" has 4 files:', dir_populated, .sep = " ") %>% 
+  glue('"house_price_app/unified_geo_ids" has 4 files:', dir_populated, .sep = " ") %>% 
     message()
   
   if(!dir_exists_check | !dir_populated){
     
     message("Creating directory and populating with shapefiles")
     
-    dir.create("shiny_app/unified_geo_ids", recursive = T)
+    dir.create("house_price_app/unified_geo_ids", recursive = T)
     
     list.files("data/cleaned/big/unified_geo_ids", full.names = T) %>% 
-      map(file.copy, to = "shiny_app/unified_geo_ids")
+      map(file.copy, to = "house_price_app/unified_geo_ids")
   }
   
   else 
     
     message("Directory already exists with shapefiles")
-  list.files("shiny_app/unified_geo_ids")
+  list.files("house_price_app/unified_geo_ids")
   
 }
+
+copy_unified_geos_shapefiles()
 
 #trimmed model results
 vroom("data/modelling/results/bag_full_model_results.csv") %>% 
@@ -82,7 +85,7 @@ vroom("data/modelling/results/bag_full_model_results.csv") %>%
          lot_area, finished_living_area, year_built,
          heat_type, ac_flag, sale_month,
          sale_price_adj, .pred_dollar) %>% 
-  write_csv("shiny_app/trimmed_full_model_results.csv")
+  write_csv("house_price_app/trimmed_full_model_results.csv")
 
 
 # 

@@ -129,14 +129,9 @@ server <- function(input, output, session) {
   
   output$model_output_graph <- renderPlot({
     
-    binwidth_calc <- IQR(representative_sample_reactive()$sale_price_adj) / 10
-    
     representative_sample_reactive() %>%
-      ggplot(aes(x = sale_price_adj)) +
-      geom_histogram(fill = "grey", color = "black", binwidth = binwidth_calc) +
-      # annotate(geom = "rect",
-      #          xmin = predictions_reactive()$.pred_lower, xmax = predictions_reactive()$.pred_upper,
-      #          ymin = 0, ymax = Inf, fill = "#FCCF02", alpha = .7) +
+      ggplot(aes(x = .pred_dollar)) +
+      geom_histogram(fill = "grey", color = "black") +
       geom_vline(aes(xintercept = predictions_reactive()$.pred),
                  color = "#FCCF02",
                  size = 2) +
@@ -149,10 +144,9 @@ server <- function(input, output, session) {
            subtitle = str_c("Prediction:", dollar(predictions_reactive()$.pred), sep = " "),
            x = "Actual Sale Price",
            y = "Sales of similar homes") +
-      theme(#panel.background = element_rect(fill = "white"),
-        plot.subtitle = element_text(size = 22),
-        axis.title.x = element_text(size = 20, hjust = .5),
-        axis.title.y = element_text(size = 20))
+      theme(plot.subtitle = element_text(size = 22),
+            axis.title.x = element_text(size = 20, hjust = .5),
+            axis.title.y = element_text(size = 20))
     
   })
   
@@ -180,9 +174,8 @@ server <- function(input, output, session) {
   #capture click from leaflet map
   selected_geo_id <- reactive({input$geo_id_map_shape_click$id})
   
-  observe({ #observer
-    
-    req(selected_geo_id())
+  #observer
+  observeEvent(selected_geo_id(), { 
     
     #filter and map
     leafletProxy("geo_id_map", data = filter(geo_id_shapes, geo_id == input$geo_id_map_shape_click$id)) %>%
@@ -227,51 +220,6 @@ server <- function(input, output, session) {
     
   })
   
-  # output$bedrooms_graph <- renderPlot({
-  #   
-  #   representative_sample_reactive() %>% 
-  #     count(bedrooms, sort = T) %>% 
-  #     ggplot(aes(bedrooms, n)) +
-  #     geom_col() +
-  #     scale_x_continuous(breaks = representative_sample_reactive() %>% distinct(bedrooms) %>% pull(bedrooms))
-  #   
-  # })
-  
-  # output$bathrooms_graph <- renderPlot({
-  #   
-  #   representative_sample_reactive() %>% 
-  #     count(full_baths, half_baths, sort = T) %>% 
-  #     complete(full_baths, half_baths, fill = list(n = 0)) %>% 
-  #     ggplot(aes(full_baths, half_baths, fill = n)) +
-  #     geom_tile() +
-  #     scale_fill_viridis_c() +
-  #     coord_equal() +
-  #     scale_x_continuous(breaks = representative_sample_reactive() %>% distinct(full_baths) %>% pull(full_baths)) +
-  #     scale_y_continuous(breaks = representative_sample_reactive() %>% distinct(half_baths) %>% pull(half_baths))
-  #   
-  # })
-  
-  # output$lot_area_finished_living_area_graph <- renderPlot({
-  #   
-  #   representative_sample_reactive() %>% 
-  #     select(lot_area, finished_living_area) %>% 
-  #     pivot_longer(cols = everything(), names_to = "metric", values_to = "values") %>% 
-  #     ggplot(aes(values, fill = metric)) +
-  #     geom_density() +
-  #     facet_wrap(~metric, nrow = 2, scales = "free") +
-  #     scale_fill_viridis_d()
-  #   
-  # })
-  
-  # output$year_built_graph <- renderPlot({
-  #   
-  #   representative_sample_reactive() %>% 
-  #     select(year_built) %>% 
-  #     ggplot(aes(year_built)) +
-  #     geom_histogram(binwidth = 5)
-  #   
-  # })
-  # 
   output$credits_1 <- renderText("Dashboard created by Conor Tompkins with R + Leaflet")
   output$credits_2 <- renderText("Parcel assessment data sourced from Allegheny County and the WPRDC")
   output$website <- renderText("https://ctompkins.netlify.app/")

@@ -50,9 +50,8 @@ data/modelling/objects
 data/modelling/results
 data/raw
 
-#saved images
-output/images
-output/*.csv
+#saved images and other files
+output
 
 #eda and modelling rmarkdown output HTML
 scripts/modelling/*.html
