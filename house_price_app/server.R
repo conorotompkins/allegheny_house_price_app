@@ -129,11 +129,14 @@ server <- function(input, output, session) {
   
   output$model_output_graph <- renderPlot({
     
-    binwidth_calc <- IQR(representative_sample_reactive()$sale_price_adj) / 10
+    #binwidth_calc <- IQR(representative_sample_reactive()$sale_price_adj) / 10
+    
+    print(glimpse(representative_sample_reactive()))
     
     representative_sample_reactive() %>%
-      ggplot(aes(x = sale_price_adj)) +
-      geom_histogram(fill = "grey", color = "black", binwidth = binwidth_calc) +
+      ggplot(aes(x = .pred_dollar)) +
+      geom_histogram(fill = "grey", color = "black"#, binwidth = binwidth_calc
+                     ) +
       # annotate(geom = "rect",
       #          xmin = predictions_reactive()$.pred_lower, xmax = predictions_reactive()$.pred_upper,
       #          ymin = 0, ymax = Inf, fill = "#FCCF02", alpha = .7) +
@@ -180,9 +183,7 @@ server <- function(input, output, session) {
   #capture click from leaflet map
   selected_geo_id <- reactive({input$geo_id_map_shape_click$id})
   
-  observe({ #observer
-    
-    req(selected_geo_id())
+  observeEvent(selected_geo_id(), { #observer
     
     #filter and map
     leafletProxy("geo_id_map", data = filter(geo_id_shapes, geo_id == input$geo_id_map_shape_click$id)) %>%
